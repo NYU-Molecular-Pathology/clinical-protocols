@@ -16,11 +16,20 @@ umask 007
 PROJ=$1
 PARAMS=$(echo "$*" | cut -d ' ' -f 2-)
 
-if [ -z "$3" ]
-then
-	echo "ERROR! NO ARGUMENT SUPPLIED."
-	exit 1
+# ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
+num_args="$#"
+args_should_be_greaterthan="0"
+if (( "$num_args" <= "$args_should_be_greaterthan" )); then
+            echo "ERROR: Wrong number of arguments supplied"
+            echo "Number of script arguments should be at least: $args_should_be_greaterthan"
+            grep '^##' $0
+            exit
 fi
+# if [ -z "$3" ]
+# then
+# 	echo "ERROR! NO ARGUMENT SUPPLIED."
+# 	exit 1
+# fi
 
 # paths
 RUN_DIR="/ifs/data/molecpathlab/quicksilver/${PROJ}"

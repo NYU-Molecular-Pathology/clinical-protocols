@@ -51,6 +51,10 @@ then
 	exit 1
 fi
 
+# make the qsub log dir
+# qsub_log_dir="${OUT_DIR}/logs"
+# mkdir -p "$qsub_log_dir"
+
 # show settings
 echo " * RUN DIR: $RUN_DIR "
 echo " * OUT DIR: $OUT_DIR "
@@ -63,9 +67,13 @@ sleep 3
 mkdir -p "$OUT_DIR"
 cd "${OUT_DIR}"
 
+#
+
 # bcl2fastq
 qsub -cwd -M ${USER}@nyumc.org -pe threaded 6-16 \
 /ifs/data/molecpathlab/scripts/bcl2fastq.217.sh $PROJ $PARAMS
+# -o :${qsub_log_dir}/ -e :${qsub_log_dir}/ \
+
 
 # cleanup
 # qsub -cwd -M ${USER}@nyumc.org /ifs/data/sequence/share/GTC/internal/cleanup-production.sh
