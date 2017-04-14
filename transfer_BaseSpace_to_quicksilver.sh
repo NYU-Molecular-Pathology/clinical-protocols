@@ -136,7 +136,7 @@ printf "\nNumber of unique %s filenames found: %s\n\n" "$file_type" "$num_unique
 
 
 # ~~~~~ COPY THE FILES ~~~~~ #
-printf "%s\nStarting file transfer....\n\n" "$divider"
+printf "%s\nStarting file transfer.... This might take a while.... \n\n" "$divider"
 
 # if False, then check for duplicate file basenames; if True, keep parent dirs
 if [ "$some_filenames_lack_parentID" == "False" ]; then
@@ -162,7 +162,7 @@ fi
 # ~~~~~ FINISHED ~~~~~ #
 unmount_command="basemount --unmount $basepace_dir"
 remount_command="basemount ${basepace_dir}/"
-echo "BaseSpace copy script finished. Please check to make sure files were successfully transferred"
-printf "If you are done transferring files, remember to unmount your BaseMount directory with this command:\n%s\n\n" "$unmount_command"
-printf "If you need to remount your BaseMount directory, you can use this command:\n%s\n\n" "$remount_command"
+printf "\n%s\nBaseSpace copy script finished. Please check to make sure files were successfully transferred\n\n" "$divider"
+printf "If you are finished with all file transfers, remember to unmount your BaseMount directory with this command:\n%s\n\n" "$unmount_command"
+# printf "If you need to remount your BaseMount directory, you can use this command:\n%s\n\n" "$remount_command"
 
