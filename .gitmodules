@@ -1,0 +1,9 @@
+[submodule "sns"]
+	path = sns
+	url = https://github.com/igordot/sns
+[submodule "IGV-snapshot-automator"]
+	path = IGV-snapshot-automator
+	url = https://github.com/stevekm/IGV-snapshot-automator.git
+[submodule "sns-wes-coverage-analysis"]
+	path = sns-wes-coverage-analysis
+	url = https://github.com/stevekm/sns-wes-coverage-analysis.git
