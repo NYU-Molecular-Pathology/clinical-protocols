@@ -1,0 +1,293 @@
+---
+title: "WES Report"
+author: "Stephen Kelly"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    css: styles.css
+    keep_md: yes
+    number_sections: true
+    toc: true
+    toc_float: true
+params:
+  run_analysis_output_dir: run_analysis_output
+  sns_wes_coverage_analysis_dir: sns-wes-coverage-analysis
+  project_ID_file: project_ID.txt
+  results_ID_file: results_ID.txt
+---
+<!-- Setup the R code to be used in R Markdown generation throughout the report -->
+```{r setup, include=FALSE} 
+# {.tabset} # .tabset-fade .tabset-pills
+
+# ~~~~~ SETTINGS ~~~~~ #
+knitr::opts_chunk$set(echo = FALSE)
+
+# ~~~~~ LOAD PACKAGES ~~~~~ #
+library("knitr")
+library("ggplot2")
+library("reshape2")
+library("data.table")
+library("DT")
+# ~~~~~ CUSTOM FUNCTIONS ~~~~~ #
+mycat <- function(text){
+    # function for formatting text in the report
+    cat(gsub(pattern = "\n", replacement = "  \n", x = text))
+}
+
+file_scan <- function(my_file){
+    # function for reading info from a text file
+    file_contents <- scan(my_file, what="", sep="\n")
+    return(file_contents)
+}
+
+get_file_content <- function(my_file){
+    # function to return file contents or NA if file doesn't exit
+    file_contents <- "NA"
+    if (file.exists(my_file)) {
+        if (! identical(file_scan(my_file), character(0))) {
+            file_contents <- file_scan(my_file)
+        }
+    }
+    return(file_contents)
+}
+
+reindex_rownames <- function(df){
+    # reindex the row names after subsetting
+    if(nrow(df) > 0) rownames(df) <- seq(nrow(df))
+    return(df)
+}
+
+chrom_regions2df <- function(regions){
+    # split the regions into chrom coordinates for BED files
+    # regions <- c("chr1:236998847-236998987", "chr1:237001714-237001899")
+    regions_df <- as.data.frame(do.call(rbind, strsplit(regions, ':')))
+    regions_df <- cbind(regions_df[1],
+                        as.data.frame(do.call(rbind, strsplit(as.character(regions_df$V2), '-'))))
+    colnames(regions_df) <- c("chrom", "start", "stop")
+    return(regions_df)
+}
+
+# ~~~~~ LOAD REPORT DATA ~~~~~ #
+report_dir <- getwd() # setwd(report_dir)
+sns_wes_coverage_analysis_dir <- params$sns_wes_coverage_analysis_dir
+run_analysis_output_dir <- params$run_analysis_output_dir
+project_ID_file <- params$project_ID_file
+results_ID_file <- params$results_ID_file
+
+project_ID <- get_file_content(project_ID_file)
+results_ID <- get_file_content(results_ID_file)
+
+summary_combined_table_file <- file.path(run_analysis_output_dir, "summary-combined.wes.csv")
+
+summary_combined_table <- read.delim(file = summary_combined_table_file, sep = ',')
+setnames(x = summary_combined_table, old = c("X.SAMPLE"), new = c("sample"))
+
+save.image(file="load_report_data.Rdata",compress = TRUE)
+```
+
+```{r, samples_table}
+samples_df <- summary_combined_table[, "sample", drop = FALSE]
+```
+
+```{r, mapping_table}
+mapping_table <- summary_combined_table[, "sample", drop = FALSE]
+# mapping_table["avg_raw_reads"] <- as.numeric(summary_combined_table[["R1.RAW.READS"]]) + as.numeric(summary_combined_table[["R2.RAW.READS"]]) / 2
+mapping_table["mapped"] <- summary_combined_table[["MAPPED.READS"]]
+mapping_table["deduplicated"] <- summary_combined_table[["DEDUPLICATED.READS"]]
+
+mapping_table <- reshape2::melt(mapping_table,id.vars="sample",variable.name="type",value.name="reads")
+
+mapping_table[["reads"]] <- mapping_table[["reads"]] / 1e6
+
+mapping_table[["type"]] <- factor(x = mapping_table[["type"]], levels = sort(unique(as.character(mapping_table[["type"]]), decreasing = TRUE)))
+
+mapping_plot <- ggplot(data = mapping_table, aes(x = sample, y = reads, fill = type)) + geom_bar(stat="identity", position = "dodge") + ggtitle("Sample Read Mapping") + coord_flip() + ylab("reads (millions)")  
+
+```
+
+```{r, mean_coverages}
+mean_coverages_table <- summary_combined_table[c("sample", "MEAN.COVERAGE", "MEDIAN.COVERAGE")]
+setnames(mean_coverages_table, old = c("MEAN.COVERAGE", "MEDIAN.COVERAGE"), new = c("mean", "median"))
+mean_coverages_table <- reshape2::melt(mean_coverages_table, id.vars="sample", variable.name="type",value.name="coverage")
+
+mean_coverages_plot <- ggplot(data = mean_coverages_table, aes(x = sample, y = coverage, fill = type)) + geom_bar(stat="identity", position = "dodge") + ggtitle("Coverage Per Sample") + coord_flip()
+```
+
+```{r, coverage_cutoffs}
+# colnames of the coverage cutoff columns
+coverage_above_cols <- c("X._bases_above_10", "X._bases_above_50", "X._bases_above_100", "X._bases_above_500")
+
+# make a table for just the coverage cutoff data
+coverage_cutoff_table <- reshape2::melt(summary_combined_table[c("sample", coverage_above_cols)],id.vars="sample",variable.name="coverage_cutoff",value.name="percent")
+
+# fix the values in the cutoff column
+coverage_cutoff_table[["coverage_cutoff"]] <- gsub(pattern = 'X._bases_above_', replacement = '', x = as.character(coverage_cutoff_table[["coverage_cutoff"]]))
+# reorder the factor levels for the plot
+coverage_cutoff_table[["coverage_cutoff"]] <- factor(coverage_cutoff_table[["coverage_cutoff"]], levels = sort(unique(as.numeric(coverage_cutoff_table[["coverage_cutoff"]]))))
+
+# make the plot
+coverage_cutoff_plot <- ggplot(data = coverage_cutoff_table, aes(x = sample, y = percent, fill = coverage_cutoff)) + geom_bar(stat="identity", position = "dodge") + ggtitle("Percent of Bases Above Coverage Cutoff") + coord_flip()
+
+```
+
+```{r, low_coverage_regions}
+low_cov_cols <- c("gene", "chrom", "start", "end", "width", "distancetoFeature", "biotype")
+## # # # # 
+average_coverage_per_sample_table <- read.delim(file.path(sns_wes_coverage_analysis_dir, "average_coverage_per_sample.tsv"))
+average_coverage_per_region_table <- read.delim(file.path(sns_wes_coverage_analysis_dir, "average_coverage_per_region.tsv"), header = FALSE)
+# average_coverage_per_region_regions <- chrom_regions2df(as.character(average_coverage_per_region_table[[1]]))
+
+average_coverage_per_region_plot <- ggplot(data=average_coverage_per_region_table, aes(average_coverage_per_region_table$V2)) + geom_histogram(binwidth = 50) + ggtitle("Average Coverage per Region Histogram") + ylab("number of regions") + xlab("average coverage value")
+
+## # # # # 
+
+regions_coverage_below_50_annotation_table <- read.delim(file.path(sns_wes_coverage_analysis_dir, "regions_coverage_below_50_annotation.tsv"))
+
+
+setnames(x = regions_coverage_below_50_annotation_table, old = c("external_gene_name", "seqnames", "gene_biotype"), new = c("gene", "chrom", "biotype"))
+
+regions_coverage_below_50_annotation_table <- regions_coverage_below_50_annotation_table[order(regions_coverage_below_50_annotation_table[["gene"]]),]
+regions_coverage_below_50_annotation_table <- reindex_rownames(regions_coverage_below_50_annotation_table)
+
+
+
+
+## # # # # 
+regions_0_coverage_annotation_table <- read.delim(file.path(sns_wes_coverage_analysis_dir, "regions_with_coverage_0_annotation.tsv"))
+setnames(x = regions_0_coverage_annotation_table, old = c("external_gene_name", "seqnames", "gene_biotype"), new = c("gene", "chrom", "biotype"))
+regions_0_coverage_annotation_table <- regions_0_coverage_annotation_table[order(regions_0_coverage_annotation_table[["gene"]]),]
+regions_0_coverage_annotation_table <- reindex_rownames(regions_0_coverage_annotation_table)
+
+
+```
+
+```{r, variant_calling}
+haplotype_caller_table_og <- read.delim(file.path(run_analysis_output_dir,"summary.VCF-GATK-HC-annot.csv"), sep = ',')
+setnames(x = haplotype_caller_table_og, old = c("X.SAMPLE"), new = c("sample"))
+haplotype_caller_table <- haplotype_caller_table_og
+haplotype_caller_table <- reshape2::melt(haplotype_caller_table, id.vars="sample",variable.name="type",value.name="mutations")
+haplotype_caller_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(haplotype_caller_table[["type"]]))
+haplotype_caller_plot <- ggplot(data = haplotype_caller_table, aes(x = sample, y = mutations, fill = type)) + geom_bar(stat="identity", position = "dodge") + ggtitle("Number of Mutations per Sample") + coord_flip()
+# # # # # 
+lo_freq_table_og <- read.delim(file.path(run_analysis_output_dir,"summary.VCF-LoFreq-annot.csv"), sep = ',')
+setnames(x = lo_freq_table_og, old = c("X.SAMPLE"), new = c("sample"))
+lo_freq_table <- lo_freq_table_og
+lo_freq_table <- reshape2::melt(lo_freq_table, id.vars="sample",variable.name="type",value.name="mutations")
+lo_freq_table[["type"]] <- gsub(pattern = '.muts', replacement = '', x = as.character(lo_freq_table[["type"]]))
+lo_freq_plot <- ggplot(data = lo_freq_table, aes(x = sample, y = mutations, fill = type)) + geom_bar(stat="identity", position = "dodge") + ggtitle("Number of Mutations per Sample") + coord_flip()
+
+```
+
+# Overview
+
+Project ID:
+
+`r project_ID`
+
+Results ID:
+
+`r results_ID`
+
+```{r, results='asis'}
+kable(samples_df, row.names = TRUE, caption = "Samples included in the analysis") # , align = c("c")
+# datatable(samples_df, caption = "Samples included in the analysis")
+
+```
+
+## Mapping
+
+```{r, fig.height=12, fig.width=8}
+print(mapping_plot)
+```
+
+## Coverage Per Sample {.tabset .tabset-pills}
+
+### Mean
+
+```{r}
+print(mean_coverages_plot)
+```
+
+### Per Cutoff
+
+```{r, fig.height=12, fig.width=8}
+print(coverage_cutoff_plot)
+```
+
+# Target Regions
+
+## Coverage Per Region
+
+```{r}
+print(average_coverage_per_region_plot)
+```
+
+## Regions With Low Coverage (<50)
+
+```{r}
+datatable(regions_coverage_below_50_annotation_table[low_cov_cols])
+```
+
+## Regions with 0 Coverage
+
+```{r}
+datatable(regions_0_coverage_annotation_table[low_cov_cols])
+```
+
+# Variant Calling
+
+## Haplotype Calling {.tabset .tabset-pills}
+
+### Plot
+
+```{r}
+print(haplotype_caller_plot)
+```
+
+### Table
+
+```{r}
+datatable(haplotype_caller_table_og)
+```
+
+## Lo Freq {.tabset .tabset-pills}
+
+### Plot 
+
+```{r}
+print(lo_freq_plot)
+```
+
+### Table
+
+```{r}
+datatable(lo_freq_table_og)
+```
+
+
+# System Information {.tabset .tabset-pills}
+
+## Hide
+
+## Show
+
+```{r}
+# system info
+system("uname -srv", intern = TRUE)
+
+# dir
+system('pwd',intern=T)
+
+# repo info
+system('git remote -v',intern=T)
+system('printf "%s\t%s" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)"',intern=T)
+
+# date time
+system("date", intern = TRUE)
+
+# R system info, packages, etc
+sessionInfo()
+
+# save current session
+save.image(file="final_report_data.Rdata",compress = TRUE)
+```

@@ -1,0 +1,4 @@
+*.md
+*.html
+*.Rdata
+analysis_report_files/*

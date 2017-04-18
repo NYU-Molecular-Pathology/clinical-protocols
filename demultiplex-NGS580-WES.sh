@@ -1,26 +1,21 @@
 #!/bin/bash
 
-## USAGE: demultiplex-archer.sh <Project ID>
-## EXAMPLE: demultiplex-archer.sh 170308_NB501073_0004_AHHFKYBGX2
-## DESCRIPTION: This script will run demultiplexing for NexSeq Archer runs
-## RESOURCES: http://archerdx.com/support/faqs/archer-fusionplex-variantplex-faqs/library-sequencing/demultiplex-nextseq-run-for-archer-analysis
-## https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software.html
+## USAGE: demultiplex-NGS580-WES.sh <Project ID>
+## EXAMPLE: demultiplex-NGS580-WES.sh 170308_NB501073_0004_AHHFKYBGX2
+## DESCRIPTION: This script will run demultiplexing for NexSeq NGS580 Whole Exome sequencing runs
+## RESOURCES: https://support.illumina.com/sequencing/sequencing_software/bcl2fastq-conversion-software.html
 
-# Be sure to use the "--no-lane-splitting" option mentioned on page 28 of the Illumina's bcl2fastq2 Conversion Software v2.17 Guide. The default output from the software splits the data by lane for each sample, resulting in four sets of fastq files (one for each lane) per sample. A single set of fastq files is required for each sample uploaded to Archer Analysis. Therefore, using the "--no-lane-splitting" option is critical.
+## Sample BaseSpace Command
+## /opt/illumina/Isas/1.26.0/bcl2fastq2/bin/bcl2fastq  --ignore-missing-bcls --ignore-missing-filter --ignore-missing-positions --ignore-missing-controls --auto-set-to-zero-barcode-mismatches --find-adapters-with-sliding-window --adapter-stringency 0.9 --mask-short-adapter-reads 35 --minimum-trimmed-read-length 35 -R "/data/scratch/workspace/RunFolder" --sample-sheet "/data/scratch/workspace/RunFolder/SampleSheet.csv" -o "/data/scratch/workspace/RunFolder/Analysis/Temp_01.01-GenerateFASTQ.FastqGeneration"
 
-
-#!/bin/bash
-
-# run demultiplexing - bcl2fastq 2.17.1
-
+## Using bcl2fastq 2.17.1
 
 # make the output group-writeable
 umask 007
 
 # input
 PROJ=$1
-# PARAMS=$(echo "$*" | cut -d ' ' -f 2-)
-PARAMS="--no-lane-splitting"
+PARAMS="--ignore-missing-bcls --ignore-missing-filter --ignore-missing-positions --ignore-missing-controls --auto-set-to-zero-barcode-mismatches --find-adapters-with-sliding-window --adapter-stringency 0.9 --mask-short-adapter-reads 35 --minimum-trimmed-read-length 35"
 
 
 # ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
@@ -32,11 +27,6 @@ if (( "$num_args" <= "$args_should_be_greaterthan" )); then
             grep '^##' $0
             exit
 fi
-# if [ -z "$3" ]
-# then
-# 	echo "ERROR! NO ARGUMENT SUPPLIED."
-# 	exit 1
-# fi
 
 printf "\n\n ===== DEMULTIPLEX $PROJ ===== \n\n"
 
@@ -68,7 +58,6 @@ sleep 3
 mkdir -p "$OUT_DIR"
 cd "${OUT_DIR}"
 
-#
 
 # bcl2fastq
 qsub -cwd -M ${USER}@nyumc.org -pe threaded 6-16 \
