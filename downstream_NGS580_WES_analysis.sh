@@ -70,7 +70,7 @@ find . -type f -name "*${project_ID}*" -name "*${results_ID}*" ! -name "*.md" ! 
 find sns-wes-coverage-analysis/ -type f -name "*${project_ID}*" -name "*${results_ID}*" -exec readlink -f {} \; >> "$results_list"
 
 zip_filename="${project_ID}_${results_ID}_results.zip"
-cat "$results_list" | xargs zip "$zip_filename"
+cat "$results_list" | xargs zip "$zip_filename" # try with '-j' to get rid of paths in the zip file
 
 report_file="${project_ID}_${results_ID}_analysis_report.html"
 
