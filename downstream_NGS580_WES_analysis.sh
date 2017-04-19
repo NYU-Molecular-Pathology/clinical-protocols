@@ -90,8 +90,7 @@ file_fullpath="$(readlink -f "$report_file")"
 reply_to="kellys04@nyumc.org"
 recipient_list="kellys04@nyumc.org, Yehonatan.Kane@nyumc.org, Matija.Snuderl@nyumc.org, Naima.Ismaili@nyumc.org, Aristotelis.Tsirigos@nyumc.org, Jared.Pinnell@nyumc.org, Varshini.Vasudevaraja@nyumc.org"
 message_footer="- This message was sent automatically by $(whoami) -"
-subject_line_report="[NGS580] ${project_ID} Report"
-subject_line_results="[NGS580] ${project_ID} Results"
+subject_line_report="[NGS580] ${project_ID} Report & Results"
 
 email_message_file="${analysis_project_downstream_dir}/email_message.txt"
 cat > "$email_message_file" <<E02
@@ -113,6 +112,5 @@ ${message_footer}
 E02
 
 set -x
-./toolbox/mutt.py -r "${recipient_list}" -rt "$reply_to" -mf "$email_message_file" -s "$subject_line_report" "$report_file"
-./toolbox/mutt.py -r "${recipient_list}" -rt "$reply_to" -mf "$email_message_file" -s "$subject_line_results" "$zip_filename"
+./toolbox/mutt.py -r "${recipient_list}" -rt "$reply_to" -mf "$email_message_file" -s "$subject_line_report" "$report_file" "$zip_filename"
 )
