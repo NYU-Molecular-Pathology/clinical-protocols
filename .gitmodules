@@ -7,3 +7,6 @@
 [submodule "sns-wes-coverage-analysis"]
 	path = sns-wes-coverage-analysis
 	url = https://github.com/stevekm/sns-wes-coverage-analysis.git
+[submodule "sns-wes-downstream-analysis"]
+	path = sns-wes-downstream-analysis
+	url = https://github.com/NYU-BFX/sns-wes-downstream-analysis.git
