@@ -10,3 +10,6 @@
 [submodule "sns-wes-downstream-analysis"]
 	path = sns-wes-downstream-analysis
 	url = https://github.com/NYU-BFX/sns-wes-downstream-analysis.git
+[submodule "toolbox"]
+	path = toolbox
+	url = https://github.com/stevekm/toolbox.git
