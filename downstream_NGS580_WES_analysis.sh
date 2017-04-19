@@ -56,20 +56,9 @@ zip "${zip_filename}.zip" *.tsv *.bed
 # ~~~~~ REPORTING ~~~~~ #
 printf "\n%s\nStarting reporting analysis.." "$divider"
 (
-module load pandoc/1.13.1
-
 mkdir -p "$analysis_project_downstream_dir"
-rsync -vhPtr "${source_downstream_analysis_dir}/" "${analysis_project_downstream_dir}/"
+rsync -vhPtrl "${source_downstream_analysis_dir}/" "${analysis_project_downstream_dir}/"
 cd "${analysis_project_downstream_dir}"
 
-printf "%s" "$project_ID" > project_ID.txt
-printf "%s" "$results_ID" > results_ID.txt
-
-# set -x
-ln -fs "../" "run_analysis_output"
-ln -fs "../sns-wes-coverage-analysis" "sns-wes-coverage-analysis"
-
-report_file="${project_ID}_${results_ID}_analysis_report.Rmd"
-/bin/cp analysis_report.Rmd "$report_file"
-./compile_RMD_report.R "$report_file"
+./run.sh "$project_ID" "$results_ID"
 )
