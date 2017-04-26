@@ -3,7 +3,7 @@
 ## USAGE: /ifs/data/molecpathlab/scripts/transfer_BaseSpace_to_quicksilver.sh "ProjectID" "/path/to/BaseSpace_dir"
 ## DESCRIPTION: This script will copy .fastq.gz files from a cloud-based BaseSpace project
 ## directory to the 'quicksilver' directory which has been setup to hold DNA sequencer
-## output. 
+## output.
 ##
 ## 'BaseSpace_dir' is a directory that has been mounted by BaseMount and contains
 ## data tied to your BaseSpace cloud account (sequencer projects & runs, etc.)
@@ -12,8 +12,8 @@
 ##
 ## By default all fastq files will be copied to a single common directory, but
 ## the script will first check to make sure that all fastq files have unique filenames
-## and that their parent directory names do not contain ID's which are not also 
-## included in the fastq filename. If either of these are true, then the parent 
+## and that their parent directory names do not contain ID's which are not also
+## included in the fastq filename. If either of these are true, then the parent
 ## directories will be preserved as the files are copied.
 
 
@@ -23,7 +23,7 @@ copy_to_common_dir () {
     local source_dir="$1"
     local destination_dir="$2"
     local file_type="$3"
-    find "${source_dir}" -name "${file_type}" -exec rsync -vctrPh {} "$destination_dir" \; 
+    find "${source_dir}" -name "${file_type}" -exec rsync -vctrPh {} "$destination_dir" \;
 }
 
 copy_with_parents () {
@@ -36,9 +36,9 @@ copy_with_parents () {
     find "$source_dir" -name "${file_type}" | while read item; do
         parent_dir="${item##*Samples/}"
         parent_dir="${parent_dir%%/*}"
-        output_path="${destination_dir}/${parent_dir}" 
+        output_path="${destination_dir}/${parent_dir}"
         printf "Copying to:\n%s\n\n" "${output_path}"
-        rsync  -vctrPh "$item" "${output_path}/"  
+        rsync  -vctrPh "$item" "${output_path}/"
     done
 }
 
@@ -51,6 +51,12 @@ print_copying () {
     printf "\nCopying all %s files %s\n\nFrom:\n%s\n\nTo:\n%s\n\n" "$file_type" "$message" "$source_dir" "$destination_dir"
 }
 
+clean_path () {
+    # remove bad characters from file or dir path
+    # update this as more bad characters are found
+    local input_path="$1"
+    echo "$input_path" | sed -e 's| (|_|g' -e 's|)||g'
+}
 
 
 # ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
@@ -81,6 +87,7 @@ file_type='*.fastq.gz'
 sequencer_dir="/ifs/data/molecpathlab/quicksilver"
 # location where the project data will be copied to; make the dir
 project_sequencer_dir="${sequencer_dir}/${project_ID}"
+project_sequencer_dir="$(clean_path "$project_sequencer_dir")"
 mkdir -p "$project_sequencer_dir"
 
 # location where the BaseSpace projects will appear
@@ -93,7 +100,7 @@ project_BaseSpace_dir="${basepace_projects}/${project_ID}"
 
 # ~~~~~ VALIDATIONS ~~~~~ #
 divider="------------------------------------------------------------"
-printf "%s\nStarting BaseSpace copy script\n\nProject Id:\n%s\n\nBaseMount directory:\n%s\n\nFile type to transfer:\n%s\n\n" "$divider" "$project_ID" "$basepace_dir" "$file_type"
+printf "%s\nStarting BaseSpace copy script\n\nProject Id:\n%s\n\nBaseMount directory:\n%s\n\nDestination directory:\n%s\n\nFile type to transfer:\n%s\n\n" "$divider" "$project_ID" "$basepace_dir" "$project_sequencer_dir" "$file_type"
 printf "%s\nValidating BaseMount directory....\n\n" "$divider"
 # make sure project_BaseSpace_dir exists
 [ ! -d "$project_BaseSpace_dir" ] && printf "ERROR: Item is not a valid directory:\n%s\n\nDoes it exist? Exiting...\n\n" "$project_BaseSpace_dir" && exit
@@ -135,6 +142,15 @@ printf "\nChecking to make sure that all %s files have unique names...\n\n" "$fi
 printf "\nNumber of unique %s filenames found: %s\n\n" "$file_type" "$num_unique_filenames"
 
 
+# ~~~~~ COPY THE SAMPLESHEET ~~~~~ #
+find "${project_BaseSpace_dir}/AppSessions/" -path "*FASTQ*" -path "*Generation*" -path "*Logs*" -name "SampleSheetUsed.csv" -print0 | while read -d $'\0' item; do
+    samplesheet_output_file="${project_sequencer_dir}/SampleSheet.csv"
+    printf "Found sample sheet file:\n%s\n\nCopying sample sheet file to:\n%s\n\n" "$item" "$samplesheet_output_file"
+    /bin/cp "$item" "$samplesheet_output_file"
+done
+
+
+
 # ~~~~~ COPY THE FILES ~~~~~ #
 printf "%s\nStarting file transfer.... This might take a while.... \n\n" "$divider"
 
@@ -162,7 +178,5 @@ fi
 # ~~~~~ FINISHED ~~~~~ #
 unmount_command="basemount --unmount $basepace_dir"
 remount_command="basemount ${basepace_dir}/"
-printf "\n%s\nBaseSpace copy script finished. Please check to make sure files were successfully transferred\n\n" "$divider"
+printf "\n%s\nBaseSpace copy script finished. Destination directory:\n%s\n\nPlease check to make sure files were successfully transferred\n\n" "$divider" "$project_sequencer_dir"
 printf "If you are finished with all file transfers, remember to unmount your BaseMount directory with this command:\n%s\n\n" "$unmount_command"
-# printf "If you need to remount your BaseMount directory, you can use this command:\n%s\n\n" "$remount_command"
-
