@@ -6,10 +6,10 @@
 	url = https://github.com/stevekm/IGV-snapshot-automator.git
 [submodule "sns-wes-coverage-analysis"]
 	path = sns-wes-coverage-analysis
-	url = https://github.com/stevekm/sns-wes-coverage-analysis.git
+	url = https://github.com/NYU-Molecular-Pathology/sns-wes-coverage-analysis
 [submodule "sns-wes-downstream-analysis"]
 	path = sns-wes-downstream-analysis
-	url = https://github.com/NYU-BFX/sns-wes-downstream-analysis.git
+	url = https://github.com/NYU-Molecular-Pathology/sns-wes-downstream-analysis
 [submodule "toolbox"]
 	path = toolbox
 	url = https://github.com/stevekm/toolbox.git
