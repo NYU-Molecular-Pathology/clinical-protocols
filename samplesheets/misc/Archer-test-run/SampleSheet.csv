@@ -1,0 +1,27 @@
+[Header],,,,,,,,,,
+IEMFileVersion,4,,,,,,,,,
+Investigator Name,ArcherDx,,,,,,,,,
+Project Name,Enzymatics,,,,,,,,,
+Experiment Name,Enter Experiment Name Here,,,,,,,,,
+Date,Enter Date Here,,,,,,,,,
+Workflow,GenerateFASTQ,,,,,,,,,
+Application,FASTQ Only,,,,,,,,,
+Assay,Nextera,,,,,,,,,
+Description,Description,,,,,,,,,
+Chemistry,Amplicon,,,,,,,,,
+[Reads],,,,,,,,,,
+151,,,,,,,,,,
+151,,,,,,,,,,
+[Settings],,,,,,,,,,
+Adapter,CTGTCTCTTATACACATCT,,,,,,,,,
+,,,,,,,,,,
+[Data],,,,,,,,,,
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Sample_Project,Description,GenomeFolder
+SureShot_POS,SureShot_POS,Plate,Well,1,TAAGGCGA,Illumina_RBC1_BC1,GTACGGAT,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+SureShot_NEG,SureShot_NEG,Plate,Well,2,CGTACTAG,Illumina_RBC1_BC2,CTGTGAAC,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_176,Q17_176,Plate,Well,3,AGGCAGAA,Illumina_RBC1_BC3,TCGTAGCA,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_175,Q17_175,Plate,Well,4,TCCTGAGC,Illumina_RBC1_BC4,GTGAGTCT,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_174,Q17_174,Plate,Well,5,GGACTCCT,Illumina_RBC1_BC5,GCTTGGAT,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_173,Q17_173,Plate,Well,6,TAGGCATG,Illumina_RBC1_BC6,TGAATGCG,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_172,Q17_172,Plate,Well,7,CTCTCTAC,Illumina_RBC1_BC7,CGTGTCAT,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
+Q17_171,Q17_171,Plate,Well,8,CAGAGAGG,Illumina_RBC1_BC8,CCGTAGTT,ArcherDx_Training,Description,PhiX\Illumina\RTA\Sequence\WholeGenomeFASTA
