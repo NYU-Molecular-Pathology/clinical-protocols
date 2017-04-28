@@ -14,7 +14,7 @@
 umask 007
 
 # input
-PROJ=$1
+PROJ="$1"
 PARAMS="--ignore-missing-bcls --ignore-missing-filter --ignore-missing-positions --ignore-missing-controls --auto-set-to-zero-barcode-mismatches --find-adapters-with-sliding-window --adapter-stringency 0.9 --mask-short-adapter-reads 35 --minimum-trimmed-read-length 35"
 
 
@@ -61,7 +61,7 @@ cd "${OUT_DIR}"
 
 # bcl2fastq
 qsub -cwd -M ${USER}@nyumc.org -pe threaded 6-16 \
-/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh $PROJ $PARAMS
+/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh "$PROJ" $PARAMS
 # -o :${qsub_log_dir}/ -e :${qsub_log_dir}/ \
 
 
