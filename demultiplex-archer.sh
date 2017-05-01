@@ -12,7 +12,7 @@
 #!/bin/bash
 
 # run demultiplexing - bcl2fastq 2.17.1
-
+# copied from Igor's script
 
 # make the output group-writeable
 umask 007
