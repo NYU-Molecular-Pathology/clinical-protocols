@@ -4,6 +4,67 @@
 ## DESCRIPTION: This script will set up the Whole Exome Sequencing analysis for
 ## a clinical NGS 580 gene panel run project
 
+# ~~~~~ CUSTOM FUNCTIONS ~~~~~ #
+check_dirfile_exists () {
+    local dirfile="$1"
+    local dirfile_type="$2" # d or f or l
+    local default_message="Checking to make sure an item was passed to check_dirfile_exists function..."
+    local test_message="${3:-$default_message}"
+
+    # watch out for ''
+    error_on_zerolength "$dirfile" "TRUE" "$test_message"
+
+    # check if dir exists
+    if [ "$dirfile_type" == "d" ]; then
+        [ ! -d "$dirfile" ] && echo -e "ERROR: Item is not a dir:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    fi
+
+    # check if dir exists
+    if [ "$dirfile_type" == "f" ]; then
+        [ ! -f "$dirfile" ] && echo -e "ERROR: Item is not a file:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    fi
+
+    # check if symlink exists
+    if [ "$dirfile_type" == "l" ]; then
+        [ ! -L "$dirfile" ] && echo -e "ERROR: Item is not a symlink:\n$dirfile\nDoes it exist?\nExiting..." && exit
+    fi
+}
+
+error_on_zerolength () {
+    local test_string="$1"
+    local test_type="$2" # TRUE or FALSE
+    local default_message="Testing for zero length string...\n"
+    local test_message="${3:-$default_message}"
+
+    echo -e "$test_message"
+
+    # check if zero length string
+    if [ "$test_type" == "TRUE" ]; then
+        [ -z "$test_string" ] && echo -e "ERROR: String is length zero\nExiting..." && exit
+    fi
+
+    # check if non-zero length string
+    if [ "$test_type" == "FALSE" ]; then
+        [ ! -z "$test_string" ] && echo -e "ERROR: String is not length zero\nExiting..." && exit
+    fi
+
+}
+
+find_fastq_dir () {
+    # find the parent directory that contains fast files for the run
+    local input_dir="$1"
+    (
+    find "${input_dir}" -type f -name "*.fastq.gz" ! -name "*Undetermined*" | while read i ; do
+        echo "$(dirname "$i")"
+    done
+    ) | sort -u | head -1
+}
+
+find_top_level_fastq () {
+    local input_dir="$1"
+    find "${input_dir}" -mindepth 1 -maxdepth 2 -type f -name "*.fastq.gz" ! -name "*Undetermined*"
+}
+
 # ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
 if (( "$#" != "1" )); then
     echo "ERROR: Wrong number of arguments supplied"
@@ -27,12 +88,23 @@ sequencer_project_dir="${sequencer_dir}/${project_ID}"
 analysis_project_dir="${analysis_dir}/${project_ID}"
 analysis_project_results_dir="${analysis_project_dir}/results_${timestamp}"
 
+
 # ~~~~~ VALIDATIONS ~~~~~ #
 # make sure sequencing project dir exists
 [ ! -d "$sequencer_project_dir" ] && printf "ERROR: Project directory does not exist:\n%s\n\n" "$sequencer_project_dir"
 
 # make sure it contains fastq files
 [ -z "$(find "$sequencer_project_dir" -name "*.fastq.gz" -print -quit)" ] && printf "ERROR: No fast.gz files found in directory:\n%s\n\n" "$sequencer_project_dir"
+
+# make sure the fastq's are near the top of the directory tree, otherwise search for the fastq parent dir
+if [ ! "$(find_top_level_fastq "${sequencer_project_dir}" | wc -l)" -gt 0 ]; then
+    echo "Fastq files were not found near the top level of the parent dir"
+    sequencer_project_dir="$(find_fastq_dir "${sequencer_project_dir}")"
+    printf "Sequencing project directory will be:\n%s\n" "$sequencer_project_dir"
+    check_dirfile_exists "$sequencer_project_dir" "d" "Checking to make sure that sequencing project directory exists..."
+fi
+
+
 
 # ~~~~~ SETUP ~~~~~ #
 # make the analysis results dir
