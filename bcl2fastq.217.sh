@@ -7,7 +7,7 @@
 
 # bcl2fastq 2.17.1
 # called by demultiplex.217.sh
-
+# copied from Igor's script
 
 # make the output group-writeable
 umask 007
