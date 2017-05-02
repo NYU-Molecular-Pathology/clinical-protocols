@@ -6,6 +6,10 @@ This script will search the data output directory for the NextSeq,
 find all the "RunParameters.xml" files,
 get information from each file,
 and build a CSV format index with information from all the data found for each run
+
+"RunParameters.xml" files are only present when the run was sequenced in 'standalone' mode
+otherwise, if the run was demultiplexed automatically in BaseSpace, you have to
+look in the .json files copied over from BaseMount (not covered by this script)
 '''
 
 import sys
@@ -59,12 +63,15 @@ def find_run_params(search_dir):
     return the paths to all "RunParameters.xml" files in a directory
     '''
     import os
+    search_filename = "RunParameters.xml"
+    print('Now search for file "{0}" in directory {1}'.format(search_filename, search_dir))
     params_file_list = []
     for root, dirs, files in os.walk(search_dir):
         for file in files:
-            if file == "RunParameters.xml":
+            if file == search_filename:
                 params_file = os.path.join(root, file)
                 params_file_list.append(params_file)
+    print('Found {0} matches'.format(len(params_file_list)))
     return(params_file_list)
 
 def make_params_dict(params_file):
@@ -102,7 +109,7 @@ def backup_file(input_file):
         new_filename = '{0}.{1}{2}'.format(filename, timestamp(), extension)
         new_filename = os.path.join(os.path.dirname(new_filename), "old", os.path.basename(new_filename))
         mkdirs(os.path.dirname(new_filename))
-        print('Backing up file:\n{0}\n\nTo location:\n{1}\n\n'.format(input_file, new_filename))
+        print('Backing up old file:\n{0}\n\nTo location:\n{1}\n'.format(input_file, new_filename))
         os.rename(input_file, new_filename)
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ copy_to_common_dir () {
     local source_dir="$1"
     local destination_dir="$2"
     local file_type="$3"
-    find "${source_dir}" -name "${file_type}" -exec rsync -vctrPh {} "$destination_dir" \;
+    find "${source_dir}" -name "${file_type}" -exec rsync -vtrPh {} "$destination_dir" \;
 }
 
 copy_with_parents () {
@@ -38,7 +38,7 @@ copy_with_parents () {
         parent_dir="${parent_dir%%/*}"
         output_path="${destination_dir}/${parent_dir}"
         printf "Copying to:\n%s\n\n" "${output_path}"
-        rsync  -vctrPh "$item" "${output_path}/"
+        rsync  -vtrPh "$item" "${output_path}/"
     done
 }
 
@@ -150,6 +150,10 @@ find "${project_BaseSpace_dir}/AppSessions/" -path "*FASTQ*" -path "*Generation*
 done
 
 
+# ~~~~~ COPY THE RUN INFO XMLs ~~~~~ #
+find "${project_BaseSpace_dir}" -name "*.xml" -name "Run*" -print0 | while read -d $'\0' item; do
+    /bin/cp -v "$item" "${project_sequencer_dir}/"
+done
 
 # ~~~~~ COPY THE FILES ~~~~~ #
 printf "%s\nStarting file transfer.... This might take a while.... \n\n" "$divider"
