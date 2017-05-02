@@ -11,10 +11,18 @@ if (( "$#" != "1" )); then
     exit
 fi
 
+
 # ~~~~~ GET SCRIPT ARGS ~~~~~ #
 project_subdir="$1" # ex: NS17-03/RUN_4
-project_ID="$(dirname "$project_subdir")"
-results_ID="$(basename "$project_subdir")"
+
+[ "$(echo "$project_subdir" | tr '/' ' ' | wc -w)" -ne 2 ] && printf "ERROR: Input argument not formatted correctly. The correct format is:\n%s\n\nFor example (dont run this):\n%s\n\nYou entered:\n%s\n\n" "project_ID/results_dir" "NS17-05/results_2017-05-01_14-03-29" "$project_subdir" && exit
+
+project_ID="$(echo "$project_subdir" | cut -d '/' -f1)"
+results_ID="$(echo "$project_subdir" | cut -d '/' -f2)"
+
+printf "Project ID is:\n%s\n\n" "$project_ID"
+printf "Results ID is:\n%s\n\n" "$results_ID"
+
 
 # ~~~~~ LOCATIONS & FILES & SETTINGS ~~~~~ #
 analysis_dir="/ifs/data/molecpathlab/NGS580_WES"
@@ -32,12 +40,13 @@ analysis_project_downstream_dir="${analysis_project_results_dir}/sns-wes-downstr
 printf "\n%s\nValidating project:\n%s\n\n" "$divider" "$analysis_project_results_dir"
 
 # make sure sequencing project dir exists
-printf "\nMaking sure directory exists...\n"
-[ ! -d "$analysis_project_results_dir" ] && printf "ERROR: Project directory does not exist:\n%s\n\n" "$analysis_project_results_dir"
+printf "\nMaking sure directory exists... "
+[ ! -d "$analysis_project_results_dir" ] && printf "ERROR: Project directory does not exist:\n%s\n\n" "$analysis_project_results_dir" && exit || printf "Passed\n"
 
 # make sure it contains summary-combined.wes.csv file (some samples finished samples)
-printf "\nMaking sure sns pipeline analysis has completed...\n"
-[ -z "$(find "$analysis_project_results_dir" -name "summary-combined.wes.csv" -print -quit)" ] && printf "ERROR: No summary-combined.wes.csv file found in directory:\n%s\n\n" "$sequencer_project_dir"
+printf "\nMaking sure sns pipeline analysis has completed... "
+[ -z "$(find "$analysis_project_results_dir" -name "summary-combined.wes.csv" -print -quit)" ] && printf "ERROR: No summary-combined.wes.csv file found in directory:\n%s\n\n" "$sequencer_project_dir" && exit || printf "Passed\n"
+
 
 # ~~~~~ COVERAGE ANALYSIS ~~~~~ #
 printf "\n%s\nStarting coverage analysis..\n" "$divider"
