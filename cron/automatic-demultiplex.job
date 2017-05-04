@@ -1,2 +1,2 @@
-*/15 * * * * /ifs/data/molecpathlab/scripts/automatic-demultiplex.sh
+*/15 * * * * /ifs/data/molecpathlab/scripts/automatic-demultiplex.sh >> /ifs/data/molecpathlab/scripts/cron/cron.log 2>&1
 # run every 15 minutes, 0,15,30,45
