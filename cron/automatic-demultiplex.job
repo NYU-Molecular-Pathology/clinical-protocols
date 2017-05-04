@@ -1,0 +1,2 @@
+*/15 * * * * /ifs/data/molecpathlab/scripts/automatic-demultiplex.sh
+# run every 15 minutes, 0,15,30,45
