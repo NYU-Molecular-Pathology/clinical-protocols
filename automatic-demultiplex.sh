@@ -45,7 +45,7 @@ start_demultiplexing () {
                 printf "Unaligned dir not present:\n%s\n\nStarting demultiplexing script:\n%s\n\n" "$analysis_sequencing_unaligned_dir" "$demultiplex_580_script"
                 $demultiplex_580_script "$analysis_ID"
                 file_backup "$item"
-                ) | tee "$auto_log_file"
+                ) | tee "$auto_log_file" # /copy this portion to log file
             fi # /Unaligned dir doesn't already exist
         else # samplesheet already exists
             printf "Sample sheet file is already present:\n%s\n\n" "$samplesheet_output_file"
@@ -54,6 +54,8 @@ start_demultiplexing () {
         echo "$analysis_sequencing_dir is NOT there"
     fi # /sequencing dir exists
 }
+
+printf "\nNow running script %s at time %s\n\n" "$0" "$(date -u +%Y%m%dt%H%M%S)"
 
 find "$auto_input_dir" -type f -name "*-SampleSheet.csv" -print0 | while read -d $'\0' item; do
     start_demultiplexing "$item"
