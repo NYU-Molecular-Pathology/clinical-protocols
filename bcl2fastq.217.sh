@@ -80,6 +80,10 @@ rm -rf "${OUT_DIR}/Temp"
 # fix permissions
 chmod --recursive --silent g+w "${OUT_DIR}"
 
-
-
+# rebuild the run index
+printf "Now running the sequencer index script to rebuild the run index\n\n"
+sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
+module unload python
+module load python/2.7
+$sequencer_index_script
 # end
