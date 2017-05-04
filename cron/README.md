@@ -15,3 +15,9 @@ edit the current cron job file
 ```
 crontab -e
 ```
+
+remove the cron job
+
+```
+crontab -r
+```
