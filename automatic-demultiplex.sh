@@ -1,7 +1,12 @@
 #!/bin/bash
 
-## USAGE:
-## DESCRIPTION: This script will check
+## USAGE: automatic-demultiplex.sh
+## DESCRIPTION: This script will check for new Sample sheets in a dir, and if found
+## will automatically start demultiplexing for the given run
+## Samplesheet name format:
+## <run_ID>-SampleSheet.csv
+## example:
+## 170426_NB501073_0008_AHCKY5BGX2-SampleSheet.csv
 
 # ~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~ #
 print_div () {
@@ -58,16 +63,18 @@ start_demultiplexing () {
                 ( # copy this portion to log file
                 printf "$start_message"
                 cat << E0F
+
+
 Sample sheet file is not present:
 $samplesheet_output_file
 
 Copying over the samplesheet.
+
 E0F
-                # printf "Sample sheet file is not present:\n%s\n\n" "$samplesheet_output_file"
-                # printf "Copying over the samplesheet.\n"
                 /bin/cp "$item" "$samplesheet_output_file"
 
                 cat << E0F
+
 Unaligned dir not present:
 $analysis_sequencing_unaligned_dir
 
@@ -75,14 +82,30 @@ Starting demultiplexing script, command is:
 
 $demult_command
 $(print_div)
+
 E0F
-                # printf "Unaligned dir not present:\n%s\n\nStarting demultiplexing script:\n%s\n\n" "$analysis_sequencing_unaligned_dir" "$demultiplex_580_script"
-                # $demultiplex_580_script "$analysis_ID"
-                # $demultiplex_580_script "$analysis_ID"
-                $demult_command && print_div "Demultiplexing started successfully" && print_div
+                $demult_command && print_div "Demultiplexing job submitted successfully" && print_div
                 file_backup "$item"
                 print_log_info "$auto_log_file"
                 ) | tee "$auto_log_file" # /copy this portion to log file
+                email_log "$auto_log_file" "$analysis_ID"
+            else # # Unaligned dir already exists
+                (
+                cat << E0F
+$start_message
+$(print_error)
+ERROR: Unaligned dir already exists:
+
+$analysis_sequencing_unaligned_dir
+
+Demultiplexing script will NOT be run
+$(print_error)
+
+E0F
+                file_backup "$item"
+                print_log_info "$auto_log_file"
+                ) | tee "$auto_log_file"
+                email_log "$auto_log_file" "$analysis_ID"
             fi # /Unaligned dir doesn't already exist
         else # samplesheet already exists
             (
@@ -100,6 +123,7 @@ E0F
             file_backup "$item"
             print_log_info "$auto_log_file"
             ) | tee "$auto_log_file"
+            email_log "$auto_log_file" "$analysis_ID"
         fi # /samplesheet doesn't already exist
     else # sequencing dir doesnt exists
         (
@@ -117,9 +141,24 @@ E0F
         file_backup "$item"
         print_log_info "$auto_log_file"
         ) | tee "$auto_log_file"
+        email_log "$auto_log_file" "$analysis_ID"
     fi # /sequencing dir exists
 }
 
+email_log () {
+    set -x
+    local auto_log_file="$1"
+    local analysis_ID="$2"
+    # local recipient_list="address1@gmail.com, address2@gmail.com" #"#MolecularPathology@nyumc.org"
+    # local recipient_list="MolecularPathology@nyumc.org"
+    local recipient_list="kellys04@nyumc.org"
+    local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
+    # export EMAIL="kellys04@nyumc.org"
+    mutt -s "$subject_line" -- "$recipient_list" <<E0F
+$(cat $auto_log_file)
+E0F
+    set +x
+}
 
 # ~~~~~~~~~~ SETTINGS ~~~~~~~~~~ #
 auto_input_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
