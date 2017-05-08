@@ -145,19 +145,30 @@ E0F
     fi # /sequencing dir exists
 }
 
+get_recipient_list () {
+    # Default reciepient list
+    # recipient_list="address1@gmail.com, address2@gmail.com"
+    # local recipient_list="MolecularPathology@nyumc.org" "#MolecularPathology@nyumc.org"
+    local recipient_list="kellys04@nyumc.org"
+
+    # check for a saved email recipient list to use instead
+    local email_recipient_file="email_recipients.txt"
+    if [ -f "$email_recipient_file" ] ; then
+        local recipient_list="$(tr -d '\n' < "$email_recipient_file" )"
+    fi
+    echo "$recipient_list"
+}
+
 email_log () {
-    set -x
     local auto_log_file="$1"
     local analysis_ID="$2"
-    # local recipient_list="address1@gmail.com, address2@gmail.com" #"#MolecularPathology@nyumc.org"
-    # local recipient_list="MolecularPathology@nyumc.org"
-    local recipient_list="kellys04@nyumc.org"
+    local recipient_list="$(get_recipient_list)"
+    # local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
     # export EMAIL="kellys04@nyumc.org"
     mutt -s "$subject_line" -- "$recipient_list" <<E0F
 $(cat $auto_log_file)
 E0F
-    set +x
 }
 
 # ~~~~~~~~~~ SETTINGS ~~~~~~~~~~ #
