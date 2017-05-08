@@ -84,10 +84,10 @@ $demult_command
 $(print_div)
 
 E0F
-                $demult_command && print_div "Demultiplexing job submitted successfully" && print_div
+                $demult_command && print_div "Demultiplexing job submitted successfully" && print_div || print_error "WARNING: Demultiplexing job may not have started successfully!!"
                 file_backup "$item"
                 print_log_info "$auto_log_file"
-                ) | tee "$auto_log_file" # /copy this portion to log file
+                ) 2>&1 | tee "$auto_log_file" # /copy this portion to log file
                 email_log "$auto_log_file" "$analysis_ID"
             else # # Unaligned dir already exists
                 (
@@ -104,7 +104,7 @@ $(print_error)
 E0F
                 file_backup "$item"
                 print_log_info "$auto_log_file"
-                ) | tee "$auto_log_file"
+                ) 2>&1 | tee "$auto_log_file"
                 email_log "$auto_log_file" "$analysis_ID"
             fi # /Unaligned dir doesn't already exist
         else # samplesheet already exists
@@ -122,7 +122,7 @@ $(print_error)
 E0F
             file_backup "$item"
             print_log_info "$auto_log_file"
-            ) | tee "$auto_log_file"
+            ) 2>&1 | tee "$auto_log_file"
             email_log "$auto_log_file" "$analysis_ID"
         fi # /samplesheet doesn't already exist
     else # sequencing dir doesnt exists
@@ -140,7 +140,7 @@ $(print_error)
 E0F
         file_backup "$item"
         print_log_info "$auto_log_file"
-        ) | tee "$auto_log_file"
+        ) 2>&1 | tee "$auto_log_file"
         email_log "$auto_log_file" "$analysis_ID"
     fi # /sequencing dir exists
 }

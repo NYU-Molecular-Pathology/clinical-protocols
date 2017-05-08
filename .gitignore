@@ -1,2 +1,3 @@
 log/*
 email_recipients.txt
+cron.log
