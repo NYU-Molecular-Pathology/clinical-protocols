@@ -185,6 +185,6 @@ start_script_message="$(print_div "$(printf "Now running script:\n%s\n\ncurrent 
 
 
 # ~~~~~~~~~~ RUN ~~~~~~~~~~ #
-find "$auto_input_dir" -type f -name "*-SampleSheet.csv" -print0 | while read -d $'\0' item; do
+find "$auto_input_dir" -maxdepth 1 -mindepth 1 -type f -name "*-SampleSheet.csv" -print0 | while read -d $'\0' item; do
     start_demultiplexing "$item"
 done
