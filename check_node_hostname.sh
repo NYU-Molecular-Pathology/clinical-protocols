@@ -23,6 +23,9 @@ wait_job_start () {
         sleep 1
     done
     printf "\n\n"
+
+    local node_name="$(get_node_name "$job_id")"
+    printf "Job is running on node $node_name \n\n"
 }
 
 wait_job_finish () {
@@ -45,6 +48,10 @@ check_for_job_submission () {
     fi
 }
 
+get_node_name () {
+    local job_id="$1"
+    qstat | grep "$job_id" | sed -e 's|^.*[[:space:]]\([a-zA-Z0-9.]*@[^ ]*\).*$|\1|g'
+}
 # ~~~~~ RUN ~~~~~ #
 printf "Submitting cluster job to get node hostname and IP\n\n"
 
