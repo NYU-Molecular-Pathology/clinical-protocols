@@ -1,3 +1,4 @@
 log/*
 email_recipients.txt
 cron.log
+email_recipients_old.txt
