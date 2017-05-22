@@ -15,6 +15,7 @@ look in the .json files copied over from BaseMount (not covered by this script)
 import sys
 import os
 import csv
+from settings import *
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def my_debugger(vars):
@@ -113,7 +114,8 @@ def backup_file(input_file):
         os.rename(input_file, new_filename)
 
 if __name__ == "__main__":
-    sequencer_dir = "/ifs/data/molecpathlab/quicksilver"
+    # sequencer_dir = "/ifs/data/molecpathlab/quicksilver"
+    sequencer_dir = nextseq_dir # from settings
     index_dir = mkdirs(os.path.join(sequencer_dir, "run_index"), return_path = True)
     index_file = os.path.join(index_dir, "index.csv")
     backup_file(index_file)
