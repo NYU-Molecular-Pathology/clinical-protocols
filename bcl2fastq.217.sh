@@ -4,13 +4,14 @@
 #$ -j y
 #$ -m a
 
+## USAGE: bcl2fastq.217.sh <projectID> -extra -params -to -use
+## DESCRIPTION:
 
-# bcl2fastq 2.17.1
-# called by demultiplex.217.sh
 # copied from Igor's script
 
-# make the output group-writeable
-umask 007
+# ~~~~~~~~~~ CUSTOM ENVIRONMENT ~~~~~~~~~~ #
+source /ifs/data/molecpathlab/scripts/settings
+source /ifs/data/molecpathlab/scripts/bash_settings.sh
 
 # input
 PROJ=$1
@@ -25,25 +26,22 @@ if (( "$num_args" <= "$args_should_be_greaterthan" )); then
             grep '^##' $0
             exit
 fi
-# if [ -z "$3" ]
-# then
-# 	echo "ERROR! NO ARGUMENT SUPPLIED."
-# 	exit 1
-# fi
 
-# paths
-RUN_DIR="/ifs/data/molecpathlab/quicksilver/${PROJ}"
+# ~~~~~ LOCATIONS ~~~~~ #
+# RUN_DIR="/ifs/data/molecpathlab/quicksilver/${PROJ}"
+RUN_DIR="${nextseq_dir}/${PROJ}"
 BASECALLS_DIR="${RUN_DIR}/Data/Intensities/BaseCalls"
 OUT_DIR="${BASECALLS_DIR}/Unaligned"
 SAMPLE_SHEET="${BASECALLS_DIR}/SampleSheet.csv"
 
-# check if sample sheet exists
+# ~~~~~ CHECK FOR SAMPLESHEET ~~~~~ #
 if [ ! -s $SAMPLE_SHEET ]
 then
 	printf "\n\n ERROR! $SAMPLE_SHEET DOES NOT EXIST \n\n"
 	exit 1
 fi
 
+# ~~~~~ SETUP ~~~~~ #
 mkdir -p $OUT_DIR
 
 module unload gcc
@@ -68,9 +66,13 @@ bcl2fastq \
 --output-dir $OUT_DIR \
 $PARAMS
 "
+
+# ~~~~~ RUN ~~~~~ #
 echo $CMD
 $CMD
 
+
+# ~~~~~ POST-PROCESSING ~~~~~ #
 # create Demultiplex_Stats.htm
 cat ${OUT_DIR}/Reports/html/*/all/all/all/laneBarcode.html | grep -v "href=" > ${OUT_DIR}/Demultiplex_Stats.htm
 
@@ -82,7 +84,7 @@ chmod --recursive --silent g+w "${OUT_DIR}"
 
 # rebuild the run index
 printf "Now running the sequencer index script to rebuild the run index\n\n"
-sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
+# sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
 module unload python
 module load python/2.7
 $sequencer_index_script

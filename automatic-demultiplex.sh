@@ -8,6 +8,10 @@
 ## example:
 ## 170426_NB501073_0008_AHCKY5BGX2-SampleSheet.csv
 
+# ~~~~~~~~~~ CUSTOM ENVIRONMENT ~~~~~~~~~~ #
+source /ifs/data/molecpathlab/scripts/settings
+source /ifs/data/molecpathlab/scripts/bash_settings.sh
+
 # ~~~~~~~~~~ FUNCTIONS ~~~~~~~~~~ #
 print_div () {
     local default_message=""
@@ -148,11 +152,12 @@ E0F
 get_recipient_list () {
     # Default reciepient list
     # recipient_list="address1@gmail.com, address2@gmail.com"
-    # local recipient_list="MolecularPathology@nyumc.org" "#MolecularPathology@nyumc.org"
     local recipient_list="kellys04@nyumc.org"
 
     # check for a saved email recipient list to use instead
-    local email_recipient_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"
+    # local email_recipient_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"
+    local email_recipient_file="$email_recipients_file" # from settings
+
     if [ -f "$email_recipient_file" ] ; then
         local recipient_list="$(tr -d '\n' < "$email_recipient_file" )"
     fi
@@ -172,11 +177,15 @@ E0F
 }
 
 # ~~~~~~~~~~ SETTINGS ~~~~~~~~~~ #
-auto_input_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
-auto_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs"
+# auto_input_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
+auto_input_dir="$auto_demultiplex_dir"
+# auto_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs"
+auto_log_dir="$auto_demultiplex_log_dir"
 
-sequencer_dir="/ifs/data/molecpathlab/quicksilver"
-demultiplex_580_script="/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
+# sequencer_dir="/ifs/data/molecpathlab/quicksilver"
+sequencer_dir="$nextseq_dir"
+# demultiplex_580_script="/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
+demultiplex_580_script="$demultiplex_NGS580_WES_script"
 
 script_time="$(date -u +%Y-%m-%dT%H:%M:%S)"
 script_timestamp="$(date -u +%Y%m%dt%H%M%S)"

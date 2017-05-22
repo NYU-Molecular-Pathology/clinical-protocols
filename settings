@@ -4,10 +4,14 @@
 
 script_dir="/ifs/data/molecpathlab/scripts"
 nextseq_dir="/ifs/data/molecpathlab/quicksilver"
+NGS580_analysis_dir="/ifs/data/molecpathlab/NGS580_WES"
+
 auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
+auto_demultiplex_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs"
 
 email_recipients_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"
 
 demultiplex_NGS580_WES_script="/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
 demultiplex_archer_script="/ifs/data/molecpathlab/scripts/demultiplex-archer.sh"
 bcl2fastq_217_script="/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh"
+sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"

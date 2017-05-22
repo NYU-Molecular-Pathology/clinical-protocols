@@ -4,6 +4,10 @@
 ## DESCRIPTION: This script will set up the Whole Exome Sequencing analysis for
 ## a clinical NGS 580 gene panel run project
 
+# ~~~~~~~~~~ CUSTOM ENVIRONMENT ~~~~~~~~~~ #
+source /ifs/data/molecpathlab/scripts/settings
+source /ifs/data/molecpathlab/scripts/bash_settings.sh
+
 # ~~~~~ CUSTOM FUNCTIONS ~~~~~ #
 check_dirfile_exists () {
     local dirfile="$1"
@@ -77,9 +81,12 @@ project_ID="$1"
 
 
 # ~~~~~ LOCATIONS & FILES & SETTINGS ~~~~~ #
-sequencer_dir="/ifs/data/molecpathlab/quicksilver"
-analysis_dir="/ifs/data/molecpathlab/NGS580_WES"
-scripts_dir="/ifs/data/molecpathlab/scripts"
+# sequencer_dir="/ifs/data/molecpathlab/quicksilver"
+sequencer_dir="$nextseq_dir"
+# analysis_dir="/ifs/data/molecpathlab/NGS580_WES"
+analysis_dir="$NGS580_analysis_dir"
+# scripts_dir="/ifs/data/molecpathlab/scripts"
+scripts_dir="$script_dir"
 sns_dir="${scripts_dir}/sns"
 wes_targets_bed="${analysis_dir}/NGS580_targets.bed"
 timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
