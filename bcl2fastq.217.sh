@@ -7,7 +7,7 @@
 ## USAGE: bcl2fastq.217.sh <projectID> -extra -params -to -use
 ## DESCRIPTION:
 
-# copied from Igor's script
+# based on Igor's script
 
 # ~~~~~~~~~~ CUSTOM ENVIRONMENT ~~~~~~~~~~ #
 source /ifs/data/molecpathlab/scripts/settings
@@ -84,7 +84,6 @@ chmod --recursive --silent g+w "${OUT_DIR}"
 
 # rebuild the run index
 printf "Now running the sequencer index script to rebuild the run index\n\n"
-# sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
 # $sequencer_index_script
 $sequencer_xml_parse_script --index
 

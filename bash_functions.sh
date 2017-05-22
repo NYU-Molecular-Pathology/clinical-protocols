@@ -22,7 +22,7 @@ num_args_should_be () {
         if (( "$num_args" >= "$arg_limit" )); then
             printf "ERROR: Wrong number of arguments supplied\n"
             grep '^##' $0
-            exit
+            exit 1
         fi
     fi
 
@@ -30,7 +30,7 @@ num_args_should_be () {
         if (( "$num_args" <= "$arg_limit" )); then
             printf "ERROR: Wrong number of arguments supplied\n"
             grep '^##' $0
-            exit
+            exit 1
         fi
     fi
 
@@ -38,7 +38,7 @@ num_args_should_be () {
         if (( "$num_args" != "$arg_limit" )); then
             printf "ERROR: Wrong number of arguments supplied\n"
             grep '^##' $0
-            exit
+            exit 1
         fi
     fi
 
@@ -56,17 +56,17 @@ check_dirfile_exists () {
 
     # check if dir exists
     if [ "$dirfile_type" == "d" ]; then
-        [ ! -d "$dirfile" ] && printf "ERROR: Directory not found:\n$dirfile\nExiting...\n" && exit || printf ' ...Success\n'
+        [ ! -d "$dirfile" ] && printf "ERROR: Directory not found:\n$dirfile\nExiting...\n" && exit 1 || printf ' ...Success\n'
     fi
 
     # check if dir exists
     if [ "$dirfile_type" == "f" ]; then
-        [ ! -f "$dirfile" ] && printf "ERROR: File not found:\n$dirfile\nExiting...\n" && exit || printf ' ...Success\n'
+        [ ! -f "$dirfile" ] && printf "ERROR: File not found:\n$dirfile\nExiting...\n" && exit 1 || printf ' ...Success\n'
     fi
 
     # check if symlink exists
     if [ "$dirfile_type" == "l" ]; then
-        [ ! -L "$dirfile" ] && printf "ERROR: Symlink not found:\n$dirfile\nExiting...\n" && exit || printf ' ...Success\n'
+        [ ! -L "$dirfile" ] && printf "ERROR: Symlink not found:\n$dirfile\nExiting...\n" && exit 1 || printf ' ...Success\n'
     fi
 }
 
@@ -80,12 +80,12 @@ error_on_zerolength () {
 
     # check if zero length string
     if [ "$test_type" == "TRUE" ]; then
-        [ -z "$test_string" ] && printf "ERROR: String is length zero\nExiting...\n" && exit
+        [ -z "$test_string" ] && printf "ERROR: String is length zero\nExiting...\n" && exit 1
     fi
 
     # check if non-zero length string
     if [ "$test_type" == "FALSE" ]; then
-        [ ! -z "$test_string" ] && printf "ERROR: String is not length zero\nExiting...\n" && exit
+        [ ! -z "$test_string" ] && printf "ERROR: String is not length zero\nExiting...\n" && exit 1
     fi
 
 }
@@ -95,7 +95,7 @@ check_num_file_lines () {
     local min_number_lines="$2"
 
     num_lines="$(cat "$input_file" | wc -l)"
-    (( $num_lines <  $min_number_lines )) && printf "ERROR: File has fewer than $min_number_lines lines:\n$input_file\nExiting...\n" && exit
+    (( $num_lines <  $min_number_lines )) && printf "ERROR: File has fewer than $min_number_lines lines:\n$input_file\nExiting...\n" && exit 1
 }
 
 print_div () {
