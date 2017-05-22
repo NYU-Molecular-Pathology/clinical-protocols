@@ -15,3 +15,5 @@ demultiplex_NGS580_WES_script="/ifs/data/molecpathlab/scripts/demultiplex-NGS580
 demultiplex_archer_script="/ifs/data/molecpathlab/scripts/demultiplex-archer.sh"
 bcl2fastq_217_script="/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh"
 sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
+sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/parse_run_params_xml.py"
+mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/mail_demultiplexing_results.sh"

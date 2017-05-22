@@ -85,7 +85,12 @@ chmod --recursive --silent g+w "${OUT_DIR}"
 # rebuild the run index
 printf "Now running the sequencer index script to rebuild the run index\n\n"
 # sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
-module unload python
-module load python/2.7
-$sequencer_index_script
+# $sequencer_index_script
+$sequencer_xml_parse_script --index
+
+# mail the results
+$mail_demultiplexing_results_script "$PROJ"
+
+
+
 # end
