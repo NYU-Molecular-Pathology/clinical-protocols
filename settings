@@ -5,6 +5,7 @@
 script_dir="/ifs/data/molecpathlab/scripts"
 nextseq_dir="/ifs/data/molecpathlab/quicksilver"
 NGS580_analysis_dir="/ifs/data/molecpathlab/NGS580_WES"
+bin_dir="/ifs/data/molecpathlab/bin"
 
 auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
 auto_demultiplex_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs"
