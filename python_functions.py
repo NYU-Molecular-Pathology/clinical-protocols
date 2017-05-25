@@ -59,7 +59,7 @@ def write_dicts_to_csv(dict_list, output_file):
         fp.writeheader()
         fp.writerows(dict_list)
 
-def backup_file(input_file):
+def backup_file(input_file, return_path=False):
     '''
     backup a file by moving it to a folder called 'old' and appending a timestamp
     '''
@@ -71,6 +71,8 @@ def backup_file(input_file):
         mkdirs(os.path.dirname(new_filename))
         print('Backing up old file:\n{0}\n\nTo location:\n{1}\n'.format(input_file, new_filename))
         os.rename(input_file, new_filename)
+    if return_path:
+        return input_file
 
 def find_files(search_dir, search_filename):
     '''
@@ -86,3 +88,29 @@ def find_files(search_dir, search_filename):
                 file_list.append(found_file)
     print('Found {0} matches'.format(len(file_list)))
     return(file_list)
+
+def print_json(object):
+    import json
+    print(json.dumps(object, sort_keys=True, indent=4))
+
+def write_json(object, output_file):
+    import json
+    with open(output_file,"w") as f:
+        json.dump(object, f, sort_keys=True, indent=4)
+
+def load_json(input_file):
+    import json
+    with open(input_file,"r") as f:
+        my_item = json.load(f)
+    return my_item
+
+def walklevel(some_dir, level=1):
+    import os
+    some_dir = some_dir.rstrip(os.path.sep)
+    assert os.path.isdir(some_dir)
+    num_sep = some_dir.count(os.path.sep)
+    for root, dirs, files in os.walk(some_dir):
+        yield root, dirs, files
+        num_sep_this = root.count(os.path.sep)
+        if num_sep + level <= num_sep_this:
+            del dirs[:]

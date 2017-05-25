@@ -1,0 +1,19 @@
+{
+    "auto_demultiplex_log_dir": "/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs", 
+    "bin_dir": "/ifs/data/molecpathlab/bin", 
+    "email_recipients_file": "/ifs/data/molecpathlab/scripts/email_recipients.txt", 
+    "nextseq_dir": "/ifs/data/molecpathlab/quicksilver", 
+    "script_dir": "/ifs/data/molecpathlab/scripts", 
+    "sequencing_types": {
+        "Archer": {
+            "analysis_output_dir": "/ifs/data/molecpathlab/Archer", 
+            "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/Archer", 
+            "script": "/ifs/data/molecpathlab/scripts/demultiplex-archer.sh"
+        }, 
+        "NGS580": {
+            "analysis_output_dir": "/ifs/data/molecpathlab/NGS580_WES", 
+            "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/NGS580", 
+            "script": "/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
+        }
+    }
+}

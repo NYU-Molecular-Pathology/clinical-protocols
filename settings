@@ -10,6 +10,9 @@ bin_dir="/ifs/data/molecpathlab/bin"
 auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed"
 auto_demultiplex_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultiplexing_logs"
 
+NGS580_auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/NGS580"
+Archer_auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/Archer"
+
 email_recipients_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"
 
 demultiplex_NGS580_WES_script="/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
@@ -18,3 +21,6 @@ bcl2fastq_217_script="/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh"
 sequencer_index_script="/ifs/data/molecpathlab/scripts/sequencer_index.py"
 sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/parse_run_params_xml.py"
 mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/mail_demultiplexing_results.sh"
+
+# contains some of the same items as above, but meant for use only in Python:
+sequencer_settings_file="/ifs/data/molecpathlab/scripts/sequencer_settings.json"
