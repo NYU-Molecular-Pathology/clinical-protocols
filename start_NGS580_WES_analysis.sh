@@ -125,7 +125,16 @@ ln -fs "$sequencer_project_dir" fastq_dir
 
 # find the RunParameters.xml file
 RunParameters_source_file="${sequencer_project_parent_dir}/RunParameters.xml"
-[ -f "$RunParameters_source_file" ] && printf "Copying run params file...\n" && /bin/cp -v "$RunParameters_source_file" "${analysis_project_results_dir}/"
+RunParameters_output_file="${analysis_project_results_dir}/RunParameters.xml"
+RunParameters_message_file="${analysis_project_results_dir}/RunParameters.txt"
+ExperimentName_file="${analysis_project_results_dir}/ExperimentName.txt"
+if [ -f "$RunParameters_source_file" ]; then
+    printf "Copying run params file...\n"
+    /bin/cp -v "$RunParameters_source_file" "$RunParameters_output_file"
+    $sequencer_xml_parse_script -f "$RunParameters_output_file" > "$RunParameters_message_file"
+    $sequencer_xml_parse_script -f "$RunParameters_output_file" --name > "$ExperimentName_file"
+fi
+# exit
 
 # copy over the targets BED
 printf "Copying over the targes BED file to new analysis results directory..."

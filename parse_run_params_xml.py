@@ -36,8 +36,6 @@ def make_run_index():
     index_dir = pf.mkdirs(os.path.join(sequencer_dir, "run_index"), return_path = True)
     index_file = os.path.join(index_dir, "index.csv")
     pf.backup_file(index_file)
-    # params_file_list = find_run_params(sequencer_dir)
-    # params_file_list = pf.find_files(search_dir = sequencer_dir, search_filename = 'RunParameters.xml')
     # use walklevel because there are a lot more dirs to search in this case
     params_file_list = []
     for item in pf.walklevel(sequencer_dir):
@@ -57,14 +55,21 @@ def find_run_params(project_ID):
     RunParameters_xml_file = pf.find_files(search_dir = project_dir, search_filename = 'RunParameters.xml')[0]
     return(RunParameters_xml_file)
 
-def print_run_params(RunParameters_xml_file):
+def print_run_params(RunParameters_xml_file, name_mode = False):
     '''
-    print a single run's params file to the consolea
+    print a single run's params file to the console
     '''
     params_dict = make_params_dict(RunParameters_xml_file)
-    pf.print_dict(params_dict)
+    if name_mode == True:
+        key = "ExperimentName"
+        if key in params_dict.keys():
+            value = params_dict[key]
+            print('{}'.format(value))
+    else:
+        for key, value in params_dict.items():
+            print('{}: {}\n\n'.format(key, value))
 
-def main(project_IDs, file_mode, index_mode):
+def main(project_IDs, file_mode, index_mode, name_mode):
     '''
     Main script control function
     '''
@@ -73,11 +78,11 @@ def main(project_IDs, file_mode, index_mode):
         project_items.append(item)
     if file_mode == True:
         for file in project_items:
-            print_run_params(file)
+            print_run_params(file, name_mode = name_mode)
     else:
         for ID in project_items:
             RunParameters_xml_file = find_run_params(ID)
-            print_run_params(RunParameters_xml_file)
+            print_run_params(RunParameters_xml_file, name_mode = name_mode)
     if index_mode == True:
         make_run_index()
 
@@ -93,6 +98,7 @@ def run():
 
     # optional flags
     parser.add_argument("--index", default = False, action='store_true', dest = 'index_mode', help="Create a new index of all runs in the NextSeq directory.")
+    parser.add_argument("--name", default = False, action='store_true', dest = 'name_mode', help="Print only the ExperimentName value from the params file(s).")
     parser.add_argument("-f", "--file", default = False, action='store_true', dest = 'file_mode', help="Treat input items as paths to XML files.")
 
     args = parser.parse_args()
