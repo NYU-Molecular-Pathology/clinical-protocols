@@ -92,6 +92,7 @@ wes_targets_bed="${analysis_dir}/NGS580_targets.bed"
 timestamp="$(date +"%Y-%m-%d_%H-%M-%S")"
 
 sequencer_project_dir="${sequencer_dir}/${project_ID}"
+sequencer_project_parent_dir="$sequencer_project_dir"
 analysis_project_dir="${analysis_dir}/${project_ID}"
 analysis_project_results_dir="${analysis_project_dir}/results_${timestamp}"
 
@@ -105,12 +106,11 @@ analysis_project_results_dir="${analysis_project_dir}/results_${timestamp}"
 
 # make sure the fastq's are near the top of the directory tree, otherwise search for the fastq parent dir
 if [ ! "$(find_top_level_fastq "${sequencer_project_dir}" | wc -l)" -gt 0 ]; then
-    echo "Fastq files were not found near the top level of the parent dir"
+    echo "Fastq files were not found near the top level of the parent dir, searching elsewhere..."
     sequencer_project_dir="$(find_fastq_dir "${sequencer_project_dir}")"
     printf "Sequencing project directory will be:\n%s\n" "$sequencer_project_dir"
     check_dirfile_exists "$sequencer_project_dir" "d" "Checking to make sure that sequencing project directory exists..."
 fi
-
 
 
 # ~~~~~ SETUP ~~~~~ #
@@ -122,6 +122,10 @@ mkdir -p "$analysis_project_results_dir"
 cd "$analysis_project_dir"
 ln -fs "$sequencer_project_dir" fastq_dir
 )
+
+# find the RunParameters.xml file
+RunParameters_source_file="${sequencer_project_parent_dir}/RunParameters.xml"
+[ -f "$RunParameters_source_file" ] && printf "Copying run params file...\n" && /bin/cp -v "$RunParameters_source_file" "${analysis_project_results_dir}/"
 
 # copy over the targets BED
 printf "Copying over the targes BED file to new analysis results directory..."

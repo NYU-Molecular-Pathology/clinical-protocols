@@ -105,12 +105,31 @@ def load_json(input_file):
     return my_item
 
 def walklevel(some_dir, level=1):
+    '''
+    Recursively search a directory for all items up to a given depth
+    use it like this:
+    file_list = []
+    for item in pf.walklevel(some_dir):
+        if ( item.endswith('my_file.txt') and os.path.isfile(item) ):
+            file_list.append(item)
+    '''
     import os
     some_dir = some_dir.rstrip(os.path.sep)
     assert os.path.isdir(some_dir)
     num_sep = some_dir.count(os.path.sep)
     for root, dirs, files in os.walk(some_dir):
-        yield root, dirs, files
+        # yield root, dirs, files
+        for dir in dirs:
+            yield os.path.join(root, dir)
+        for file in files:
+            yield os.path.join(root, file)
         num_sep_this = root.count(os.path.sep)
         if num_sep + level <= num_sep_this:
             del dirs[:]
+
+def print_keyword_args(**kwargs):
+    '''
+    kwargs is a dict of the keyword args passed to the function
+    '''
+    for key, value in kwargs.iteritems():
+        print "%s = %s" % (key, value)
