@@ -126,10 +126,3 @@ def walklevel(some_dir, level=1):
         num_sep_this = root.count(os.path.sep)
         if num_sep + level <= num_sep_this:
             del dirs[:]
-
-def print_keyword_args(**kwargs):
-    '''
-    kwargs is a dict of the keyword args passed to the function
-    '''
-    for key, value in kwargs.iteritems():
-        print "%s = %s" % (key, value)

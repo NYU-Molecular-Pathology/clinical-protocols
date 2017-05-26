@@ -43,8 +43,6 @@ def make_run_index():
     for item in pf.walklevel(sequencer_dir):
         if ( item.endswith('RunParameters.xml') and os.path.isfile(item) ):
             params_file_list.append(item)
-    print(params_file_list)
-    import sys; sys.exit()
     params_dicts = []
     for file in params_file_list:
         params_dicts.append(make_params_dict(file))
