@@ -230,9 +230,10 @@ def check_qsub_job_status(job_id, desired_status = "r"):
     NOTE: This does not work in Python 3+ because of string decoding requirements on the qstat_stdout object
     '''
     import re
+    from sh import qstat
     job_id_pattern = r"^.*{0}.*\s{1}\s.*$".format(job_id, desired_status)
-    qstat_stdout = subprocess_cmd('qstat', return_stdout = True)
-    # print(str(qstat_stdout))
+    qstat_stdout = qstat()
+    # qstat_stdout = subprocess_cmd('qstat', return_stdout = True)
     job_match = re.findall(str(job_id_pattern), str(qstat_stdout), re.MULTILINE)
     job_status = bool(job_match)
     if job_status == True:

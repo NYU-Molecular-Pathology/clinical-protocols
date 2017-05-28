@@ -13,3 +13,6 @@
 [submodule "toolbox"]
 	path = toolbox
 	url = https://github.com/stevekm/toolbox.git
+[submodule "sh"]
+	path = sh
+	url = https://github.com/amoffat/sh.git
