@@ -1,0 +1,1 @@
+/ifs/data/molecpathlab/scripts/bash_settings.sh

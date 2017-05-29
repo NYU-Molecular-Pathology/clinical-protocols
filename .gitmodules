@@ -16,3 +16,6 @@
 [submodule "sh"]
 	path = sh
 	url = https://github.com/amoffat/sh.git
+[submodule "run-monitor"]
+	path = run-monitor
+	url = https://github.com/NYU-Molecular-Pathology/run-monitor.git
