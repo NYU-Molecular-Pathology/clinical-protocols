@@ -17,7 +17,11 @@
 # make the output group-writeable
 umask 007
 
-# input
+# ~~~~~~~~~~ CUSTOM ENVIRONMENT ~~~~~~~~~~ #
+source /ifs/data/molecpathlab/scripts/settings
+# dont use bash settings here because we set bcl2fastq specific environment
+
+# ~~~~~~~~~~ GET SCRIPT ARGS ~~~~~~~~~~ #
 PROJ=$1
 # PARAMS=$(echo "$*" | cut -d ' ' -f 2-)
 PARAMS="--no-lane-splitting"
@@ -68,11 +72,10 @@ sleep 3
 mkdir -p "$OUT_DIR"
 cd "${OUT_DIR}"
 
-#
 
 # bcl2fastq
 qsub -cwd -M ${USER}@nyumc.org -pe threaded 6-16 \
-/ifs/data/molecpathlab/scripts/bcl2fastq.217.sh $PROJ $PARAMS
+$bcl2fastq_217_script "$PROJ" $PARAMS
 # -o :${qsub_log_dir}/ -e :${qsub_log_dir}/ \
 
 

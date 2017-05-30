@@ -1,1 +1,0 @@
-NGS580/downstream_NGS580_WES_analysis.sh

@@ -1,1 +1,0 @@
-demultiplexing/bcl2fastq.217.sh

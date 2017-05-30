@@ -1,1 +1,0 @@
-demultiplexing/demultiplex-archer.sh
