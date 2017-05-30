@@ -17,7 +17,7 @@ email_log () {
     # local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
     # export EMAIL="kellys04@nyumc.org"
-    mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -- "$recipient_list" <<E0F
+    /usr/bin/mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -- "$recipient_list" <<E0F
 $(cat $log_file)
 E0F
 }
