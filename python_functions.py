@@ -93,6 +93,11 @@ def print_json(object):
     import json
     print(json.dumps(object, sort_keys=True, indent=4))
 
+def json_dumps(object):
+    import json
+    return(json.dumps(object, sort_keys=True, indent=4))
+
+
 def write_json(object, output_file):
     import json
     with open(output_file,"w") as f:

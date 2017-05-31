@@ -15,12 +15,12 @@
                 "Archer": {
                     "analysis_output_dir": "/ifs/data/molecpathlab/Archer", 
                     "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/Archer", 
-                    "script": "/ifs/data/molecpathlab/scripts/demultiplex-archer.sh"
+                    "script": "/ifs/data/molecpathlab/scripts/demultiplexing/demultiplex-archer.sh"
                 }, 
                 "NGS580": {
                     "analysis_output_dir": "/ifs/data/molecpathlab/NGS580_WES", 
                     "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/NGS580", 
-                    "script": "/ifs/data/molecpathlab/scripts/demultiplex-NGS580-WES.sh"
+                    "script": "/ifs/data/molecpathlab/scripts/demultiplexing/demultiplex-NGS580-WES.sh"
                 }
             }
         }
