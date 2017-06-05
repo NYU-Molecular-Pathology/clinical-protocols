@@ -13,8 +13,8 @@ email_log () {
     local analysis_ID="$2"
     local demultiplexing_stats_file="$3"
     local run_params_file="$4"
-    local recipient_list="$(get_recipient_list)"
-    # local recipient_list="kellys04@nyumc.org"
+    # local recipient_list="$(get_recipient_list)"
+    local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
     local NextSeq_index_file="$(copy_index_file)" # from settings
     # export EMAIL="kellys04@nyumc.org"
@@ -35,7 +35,9 @@ copy_index_file () {
     local NextSeq_index_file="$NextSeq_index_file" # from settings
     # file_timestamp
     # local unaligned_dir="$1"
-    local new_NextSeq_index_file="${unaligned_dir}/index_$(file_timestamp).csv" # use the global var here
+    local index_basename="$(basename $NextSeq_index_file)"
+    local index_basename="${index_basename%%.csv}"
+    local new_NextSeq_index_file="${unaligned_dir}/${index_basename}_$(file_timestamp).csv" # use the global var here
     /bin/cp "$NextSeq_index_file" "$new_NextSeq_index_file" && echo "$new_NextSeq_index_file"
 
 }

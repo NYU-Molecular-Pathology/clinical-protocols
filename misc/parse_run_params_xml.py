@@ -33,8 +33,9 @@ def make_run_index():
     Make the index for all runs in the NextSeq sequencer dir
     '''
     sequencer_dir = settings.nextseq_dir # from settings
-    index_dir = pf.mkdirs(os.path.join(sequencer_dir, "run_index"), return_path = True)
-    index_file = os.path.join(index_dir, "index.csv")
+    # index_dir = pf.mkdirs(os.path.join(sequencer_dir, "run_index"), return_path = True)
+    # index_file = os.path.join(index_dir, "index.csv")
+    index_file = settings.NextSeq_index_file
     pf.backup_file(index_file)
     # use walklevel because there are a lot more dirs to search in this case
     params_file_list = []
