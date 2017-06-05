@@ -82,14 +82,8 @@ rm -rf "${OUT_DIR}/Temp"
 # fix permissions
 chmod --recursive --silent g+w "${OUT_DIR}"
 
-# rebuild the run index
-printf "Now running the sequencer index script to rebuild the run index\n\n"
-# $sequencer_index_script
-$sequencer_xml_parse_script --index
+# ~~~~~ More POST-PROCESSING ~~~~~ #
 
-# mail the results
-$mail_demultiplexing_results_script "$PROJ"
-
-
+$demultiplexing_postprocessing_script "$PROJ"
 
 # end

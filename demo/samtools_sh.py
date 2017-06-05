@@ -4,6 +4,7 @@
 This demo script will show how to use 'sh' to access system installed tools that require
 environment setup with 'module'
 '''
+import python_functions as pf
 
 def mkdirs(path, return_path=False):
     '''
@@ -39,6 +40,19 @@ def samtools_bowtie_sh_env():
     env = json.loads(str(env_output))
     return(env)
 
+def test_samtools_bowtie():
+    import subprocess as sp
+    command = '''
+    module unload gcc > /dev/null 2>&1
+    module unload samtools > /dev/null 2>&1
+    module load samtools/1.2.1 > /dev/null 2>&1
+    module load bowtie2/2.2.6 > /dev/null 2>&1
+    bowtie2 --version
+    samtools --version
+'''
+    process = sp.Popen(command,stdout=sp.PIPE, shell=True, universal_newlines=True)
+    proc_stdout = process.communicate()[0].strip()
+    print(proc_stdout)
 
 def align():
     '''
@@ -62,5 +76,10 @@ def align():
     mkdirs("output")
     # print(bowtie2("--version"))
     print(samtools.sort(samtools.view(bowtie2("-q", "--local", threads = threads,  x = genome, U = input_fastq, _env = env), "-Sb1", samtools_threads ), samtools_threads, m = memory, _out= output_bam) )
+
+
+pf.print_json(samtools_bowtie_sh_env())
+
+test_samtools_bowtie()
 
 align()

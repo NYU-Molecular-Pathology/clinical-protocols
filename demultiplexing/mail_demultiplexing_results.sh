@@ -16,8 +16,9 @@ email_log () {
     local recipient_list="$(get_recipient_list)"
     # local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
+    local NextSeq_index_file="$(copy_index_file)" # from settings
     # export EMAIL="kellys04@nyumc.org"
-    /usr/bin/mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -- "$recipient_list" <<E0F
+    /usr/bin/mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -a "$NextSeq_index_file" -- "$recipient_list" <<E0F
 $(cat $log_file)
 E0F
 }
@@ -27,6 +28,16 @@ print_success () {
     print_div
     $sequencer_xml_parse_script "$project_ID"
     print_div
+}
+
+copy_index_file () {
+    # make a timestamped copy of the index, to be sent in the email
+    local NextSeq_index_file="$NextSeq_index_file" # from settings
+    # file_timestamp
+    # local unaligned_dir="$1"
+    local new_NextSeq_index_file="${unaligned_dir}/index_$(file_timestamp).csv" # use the global var here
+    /bin/cp "$NextSeq_index_file" "$new_NextSeq_index_file" && echo "$new_NextSeq_index_file"
+
 }
 
 # ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
