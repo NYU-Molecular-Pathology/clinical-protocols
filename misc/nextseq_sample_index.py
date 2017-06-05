@@ -14,6 +14,7 @@ import linecache
 import argparse
 import settings
 import python_functions as pf
+import parse_run_params_xml
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
 def get_runs():
@@ -84,6 +85,24 @@ def get_run_ID(samplesheet, relative_path = "Data/Intensities/BaseCalls/SampleSh
     url = 'abcdc.com'
     url = re.sub('\.com$', '', url)
 
+def get_run_params_XML(run_dir):
+    '''
+    Find the RunParameters.xml file for the run
+    '''
+    for item in pf.walklevel(run_dir):
+        if ( item.endswith('RunParameters.xml') and os.path.isfile(item) ):
+            return(item)
+
+def get_run_params(run_params_XML):
+    '''
+    Get the run params from the XML
+    '''
+    if run_params_XML != None:
+        params_dict = parse_run_params_xml.make_params_dict(params_file = run_params_XML)
+        return(params_dict)
+    else:
+        return(None)
+
 
 def main():
     '''
@@ -91,14 +110,22 @@ def main():
     '''
     runs = get_runs()
     for run, items in runs.items():
+        runs[run]['run_type'] = 'NGS580'
         run_dir = runs[run]['run_dir']
+
+        # get run params XML
+        run_params_XML = get_run_params_XML(run_dir)
+        runs[run]['run_params_XML'] = run_params_XML
+        runs[run]['run_params'] = get_run_params(run_params_XML)
+
+        # get samplesheet
         samplesheet = get_samplesheet(run_dir)
         runs[run]['samplesheet'] = samplesheet
         runs[run]['samples'] = get_samples(samplesheet)
-        # runs[run]['run_params'] =
+
     pf.print_json(runs)
-    # for samplesheet in samplesheet_list:
-    #     print(get_samples_list(samplesheet))
+    # now what to do with the information??
+
 
 
 
