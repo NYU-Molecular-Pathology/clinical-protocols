@@ -22,6 +22,7 @@ bcl2fastq_217_script="/ifs/data/molecpathlab/scripts/demultiplexing/bcl2fastq.21
 demultiplexing_postprocessing_script="/ifs/data/molecpathlab/scripts/demultiplexing/post_processing.sh"
 
 NextSeq_index_file="/ifs/data/molecpathlab/quicksilver/run_index/NextSeq_run_index.csv"
+NextSeq_sample_index_file="/ifs/data/molecpathlab/quicksilver/run_index/NextSeq_sample_index.csv"
 
 sequencer_index_script="/ifs/data/molecpathlab/scripts/misc/sequencer_index.py"
 sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/misc/parse_run_params_xml.py"
