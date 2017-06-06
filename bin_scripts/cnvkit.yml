@@ -1,0 +1,8 @@
+name: cnvkit
+channels:
+  - bioconda
+  - r
+  - conda-forge
+dependencies:
+  - python=2.7
+  - cnvkit
