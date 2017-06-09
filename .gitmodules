@@ -19,3 +19,6 @@
 [submodule "run-monitor"]
 	path = run-monitor
 	url = https://github.com/NYU-Molecular-Pathology/run-monitor.git
+[submodule "demultiplexing-stats"]
+	path = demultiplexing-stats
+	url = https://github.com/NYU-Molecular-Pathology/demultiplexing-stats.git
