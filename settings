@@ -28,5 +28,9 @@ sequencer_index_script="/ifs/data/molecpathlab/scripts/misc/sequencer_index.py"
 sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/misc/parse_run_params_xml.py"
 mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/demultiplexing/mail_demultiplexing_results.sh"
 
+# ssh key authentication needs to be set up for all users on these servers
+email_server_address_file="/ifs/data/molecpathlab/private_data/server.txt"
+default_localhost_address_file="/ifs/data/molecpathlab/private_data/server.txt"
+
 # contains some of the same items as above, but meant for use only in Python:
 sequencer_settings_file="/ifs/data/molecpathlab/scripts/sequencer_settings.json"

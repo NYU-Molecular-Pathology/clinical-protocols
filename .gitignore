@@ -5,3 +5,6 @@ email_recipients_old.txt
 *.pyc
 old/*
 test-scripts
+generate-demultiplexing-reports/reports/*
+demo/output/*
+demo/python.o*

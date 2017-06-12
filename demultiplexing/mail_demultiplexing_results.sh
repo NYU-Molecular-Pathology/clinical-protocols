@@ -17,10 +17,22 @@ email_log () {
     local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
     local NextSeq_index_file="$(copy_index_file)" # from settings
-    # export EMAIL="kellys04@nyumc.org"
-    /usr/bin/mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -a "$NextSeq_index_file" -- "$recipient_list" <<E0F
+
+    # get email server info; server with mutt installed (qsub nodes dont always have it)
+    local email_server_address_file="$email_server_address_file" # from settings
+    local email_server_address="$(head -1 "$email_server_address_file" | tr -d '\n')"
+
+    # need to ssh back into the server with mutt installed for emailing
+    ssh ${USER}@${email_server_address} <<E0F2
+# reply-to email address
+# export EMAIL="kellys04@nyumc.org"
+
+/usr/bin/mutt -s "$subject_line" -a "$demultiplexing_stats_file" -a "$run_params_file" -a "$NextSeq_index_file" -- "$recipient_list" <<E0F
+
 $(cat $log_file)
 E0F
+
+E0F2
 }
 
 print_success () {
