@@ -1,0 +1,9 @@
+name: r.3.3
+channels:
+  - bioconda
+  - r
+  - conda-forge
+dependencies:
+  - r=3.3
+  - r-essentials
+
