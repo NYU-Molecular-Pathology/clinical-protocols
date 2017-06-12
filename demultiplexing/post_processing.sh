@@ -35,6 +35,7 @@ project_ID_list="${@:1}" # accept a space separated list of ID's starting at the
 
 
 #~~~~~ NO ARGS NEEDED ~~~~~~#
+source "$activate_miniconda" # from settings
 rebuild_index
 
 

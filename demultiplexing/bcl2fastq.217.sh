@@ -82,8 +82,14 @@ rm -rf "${OUT_DIR}/Temp"
 # fix permissions
 chmod --recursive --silent g+w "${OUT_DIR}"
 
-# ~~~~~ More POST-PROCESSING ~~~~~ #
+# save a copy of the current environment
+env_file="${OUT_DIR}/bcl2fastq_env_$(file_timestamp).txt"
+echo "Environment will be saved to: $env_file"
+(
+env > "$env_file"
+)
 
+# ~~~~~ More POST-PROCESSING ~~~~~ #
 $demultiplexing_postprocessing_script "$PROJ"
 
 # end

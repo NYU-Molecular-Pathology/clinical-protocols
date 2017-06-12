@@ -49,8 +49,8 @@ then
 fi
 
 # make the qsub log dir
-# qsub_log_dir="${OUT_DIR}/logs"
-# mkdir -p "$qsub_log_dir"
+qsub_log_dir="${OUT_DIR}/qsub_logs"
+mkdir -p "$qsub_log_dir"
 
 # show settings
 echo " * RUN DIR: $RUN_DIR "
@@ -67,8 +67,9 @@ cd "${OUT_DIR}"
 
 # bcl2fastq
 qsub -cwd -M ${USER}@nyumc.org -pe threaded 6-16 \
+-o :${qsub_log_dir}/ -e :${qsub_log_dir}/ \
 $bcl2fastq_217_script "$PROJ" $PARAMS
-# -o :${qsub_log_dir}/ -e :${qsub_log_dir}/ \
+#
 
 
 # cleanup

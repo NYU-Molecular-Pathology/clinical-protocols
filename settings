@@ -28,6 +28,8 @@ sequencer_index_script="/ifs/data/molecpathlab/scripts/misc/sequencer_index.py"
 sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/misc/parse_run_params_xml.py"
 mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/demultiplexing/mail_demultiplexing_results.sh"
 
+activate_miniconda="/ifs/data/molecpathlab/scripts/bin_scripts/activate_miniconda.sh"
+
 # ssh key authentication needs to be set up for all users on these servers
 email_server_address_file="/ifs/data/molecpathlab/private_data/server.txt"
 default_localhost_address_file="/ifs/data/molecpathlab/private_data/server.txt"
