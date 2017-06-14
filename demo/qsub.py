@@ -93,6 +93,62 @@ def wait_qsub_job_start(job_id, return_True = False):
         if return_True == True:
             return(True)
 
+def wait_all_jobs_start(job_id_list):
+    '''
+    Wait for every job in a list to start
+    '''
+    import datetime
+    from time import sleep
+    import sys
+    jobs_started = False
+    startTime = datetime.datetime.now()
+    print("waiting for all jobs {0} to start...".format(job_id_list))
+    while not all([check_qsub_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        sleep(1) # Time in seconds.
+    elapsed_time = datetime.datetime.now() - startTime
+    print("all jobs have started; elapsed time: {0}".format(elapsed_time))
+    if all([check_qsub_job_status(job_id = job_id, desired_status = "r") for job_id in job_id_list]):
+        jobs_started = True
+    return(jobs_started)
+
+def check_qsub_job_absent(job_id):
+    '''
+    Check that a single job is not in the 'qstat' list
+    '''
+    import re
+    from sh import qstat
+    qstat_stdout = qstat()
+    job_id_pattern = r"^.*{0}.*$".format(job_id)
+    job_match = re.findall(str(job_id_pattern), str(qstat_stdout), re.MULTILINE)
+    job_status = bool(job_match)
+    if job_status == True:
+        return(False)
+    elif job_status == False:
+        return(True)
+
+
+def wait_all_jobs_finished(job_id_list):
+    '''
+    Wait for all jobs in the list to finish
+    A finished job is no longer present in the 'qstat' list
+    '''
+    import datetime
+    from time import sleep
+    import sys
+    jobs_finished = False
+    startTime = datetime.datetime.now()
+    print("waiting for all jobs {0} to finish...".format(job_id_list))
+    while not all([check_qsub_job_absent(job_id = job_id) for job_id in job_id_list]):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        sleep(1) # Time in seconds.
+    elapsed_time = datetime.datetime.now() - startTime
+    print("all jobs have finished; elapsed time: {0}".format(elapsed_time))
+    if all([check_qsub_job_absent(job_id = job_id) for job_id in job_id_list]):
+        jobs_finished = True
+    return(jobs_finished)
 
 def demo_qsub():
     '''
@@ -109,4 +165,28 @@ def demo_qsub():
     print('Job Name: {0}'.format(job_name))
     wait_qsub_job_start(job_id)
 
+def demo_multi_qsub():
+    '''
+    Demo the qsub code functions
+    '''
+    command = '''
+    set -x
+    cat /etc/hosts
+    sleep 30
+    '''
+    job_id_list = []
+    for i in range(5):
+        proc_stdout = submit_qsub_job(command = command, verbose = True, return_stdout = True)
+        job_id, job_name = get_qsub_job_ID_name(proc_stdout)
+        print("Job submitted...")
+        print('Job ID: {0}'.format(job_id))
+        print('Job Name: {0}'.format(job_name))
+        print("")
+        job_id_list.append(job_id)
+    wait_all_jobs_start(job_id_list)
+    wait_all_jobs_finished(job_id_list)
+
+
+
 demo_qsub()
+demo_multi_qsub()
