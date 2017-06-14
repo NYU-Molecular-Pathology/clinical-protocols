@@ -70,8 +70,14 @@ cd "${analysis_project_downstream_dir}"
 )
 
 # ~~~~~ EMAIL RESULTS ~~~~~ #
-(
-cd "$analysis_project_downstream_dir"
+# don't do this
+printf "\nTo mail the results, run the following commands:\n\n"
 
-./mail.sh "$project_ID" "$results_ID"
-)
+echo "cd $analysis_project_downstream_dir"
+echo "./mail.sh $project_ID $results_ID"
+
+# (
+# cd "$analysis_project_downstream_dir"
+#
+# ./mail.sh "$project_ID" "$results_ID"
+# )
