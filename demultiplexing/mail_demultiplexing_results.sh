@@ -13,8 +13,8 @@ email_log () {
     local analysis_ID="$2"
     local demultiplexing_stats_file="$3"
     local run_params_file="$4"
-    # local recipient_list="$(get_recipient_list)"
-    local recipient_list="kellys04@nyumc.org"
+    local recipient_list="$(get_recipient_list)"
+    # local recipient_list="kellys04@nyumc.org"
     local subject_line="$(printf "[Demultiplexing] NextSeq Run %s" "$analysis_ID")"
     local NextSeq_index_file="$(copy_index_file)" # from settings
 
