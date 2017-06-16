@@ -194,8 +194,6 @@ def validate_run(locations):
     validations.append(check_path_exists(locations.demultiplexing_stats_dir))
     validations.append(check_path_exists(locations.demultiplexing_stats_html))
 
-    validations.append(check_path_exists(os.path.join(locations.unaligned_dir, "foo.htm")))
-
 
 
     if not all(validations):
@@ -208,7 +206,6 @@ def find_email_attachments(locations):
     '''
     desired_attachments = []
     desired_attachments.append(find_file(filename = "SampleSheet.csv", dir = locations.basecalls_dir))
-    desired_attachments.append(find_file(filename = "foo", dir = locations.basecalls_dir))
     desired_attachments.append(find_file(filename = "RunParameters.xml", dir = locations.project_dir))
     desired_attachments.append(find_file(filename = os.path.basename(locations.new_demultiplexing_stats_file), dir = os.path.dirname(locations.new_demultiplexing_stats_file)))
     desired_attachments.append(find_file(filename = os.path.basename(locations.new_NextSeq_index_file), dir = os.path.dirname(locations.new_NextSeq_index_file)))
@@ -288,7 +285,6 @@ def main():
     logger.debug(email_attachments)
 
     subject_line = "[Demultiplexing] NextSeq Run {0}".format(project_ID)
-    recipient_list = "kellys04@nyumc.org"
 
     # ~~~~~ SEND EMAIL ~~~~~ #
     mutt.mutt_mail(recipient_list = recipient_list, reply_to = '', subject_line = subject_line, message_file = get_emaillog_filepath(logger), attachment_files = email_attachments, return_only_mode = False)
