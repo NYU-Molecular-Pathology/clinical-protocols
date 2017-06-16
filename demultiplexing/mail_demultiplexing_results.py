@@ -32,6 +32,7 @@ def get_locations(project_ID):
     import settings # common Python/bash locations settings file
 
     locations = Container()
+    locations.project_ID = project_ID
     locations.auto_demultiplex_log_dir = settings.auto_demultiplex_log_dir
     locations.nextseq_dir = settings.nextseq_dir
     locations.demultiplexing_email_recipients_file = settings.demultiplexing_email_recipients_file
@@ -105,7 +106,7 @@ def get_emaillog_filepath(logger):
     return(log_file)
 
 
-def print_log_info(logger):
+def print_log_filenames(logger):
     '''
     Print out the filenames of the log files we're using
     '''
@@ -114,27 +115,26 @@ def print_log_info(logger):
         for key, value in item.items():
             logger.info("{0} log file: {1}".format(key, value))
 
-def log_setup(locations):
+def log_setup(config_yaml, logger_name):
     '''
     Set up the logger for the script
+    config = path to YAML config file
     '''
     # Config file relative to this file
-    loggingConf = open('{0}/logging.yml'.format(main.path), 'r')
+    loggingConf = open(config_yaml, 'r')
     logging.config.dictConfig(yaml.load(loggingConf))
     loggingConf.close()
-    logger = logging.getLogger(main.logger_name)
-    print_log_info(logger)
+    return(logging.getLogger(logger_name))
+
 
 def print_run_info(locations):
     '''
     Print info about the current run
     '''
-    logger = logging.getLogger(main.logger_name)
-    logger.debug('Script dir: {0}'.format(main.path))
-    logger.debug('nextseq_dir: {0}'.format(locations.nextseq_dir))
-    logger.debug('project_dir: {0}'.format(locations.project_dir))
-    logger.debug('BaseCalls dir: {0}'.format(locations.basecalls_dir))
-    logger.debug('Unaligned dir: {0}'.format(locations.unaligned_dir))
+    main.logger.debug('nextseq_dir: {0}'.format(locations.nextseq_dir))
+    main.logger.debug('project_dir: {0}'.format(locations.project_dir))
+    main.logger.debug('BaseCalls dir: {0}'.format(locations.basecalls_dir))
+    main.logger.debug('Unaligned dir: {0}'.format(locations.unaligned_dir))
 
 def find_file(filename, dir):
     '''
@@ -151,9 +151,9 @@ def find_file(filename, dir):
                 if fnmatch.fnmatch(item, filename):
                     match = item_path
     if match == None:
-        logger.warning("Could not find file '{0}' in dir: {1}".format(filename, dir))
+        main.logger.warning("Could not find file '{0}' in dir: {1}".format(filename, dir))
     else:
-        logger.debug("Found file: {0}".format(match))
+        main.logger.debug("Found file: {0}".format(match))
     return(match)
 
 def check_path_exists(path):
@@ -162,9 +162,8 @@ def check_path_exists(path):
     use this for validations; if the files doesn't exist some error occured
     '''
     import os
-    logger = logging.getLogger(main.logger_name)
     if not os.path.exists(path):
-        logger.error("Path does not exist: {0}".format(path))
+        main.logger.error("Path does not exist: {0}".format(path))
         return(False)
     else:
         return(True)
@@ -175,7 +174,6 @@ def validate_run(locations):
     '''
     import sys
     import os
-    logger = logging.getLogger(main.logger_name)
     validations = []
 
     # run exists
@@ -197,7 +195,7 @@ def validate_run(locations):
 
 
     if not all(validations):
-        logger.error("Errors were found while validating run")
+        main.logger.error("Errors were found while validating run")
 
 
 def find_email_attachments(locations):
@@ -222,23 +220,21 @@ def log_copy(src, dest):
     Copy a file, and print a log message that we're doing it
     '''
     import shutil
-    logger = logging.getLogger(main.logger_name)
-    logger.debug("Copying {0} to {1}".format(src, dest))
+    main.logger.debug("Copying {0} to {1}".format(src, dest))
     shutil.copy(src, dest)
 
 def run_housekeeping(locations):
     '''
     Miscellaneous steps to take when prepping the run results for emailing
     '''
-    logger = logging.getLogger(main.logger_name)
     # try to print the RTAComplete.txt file contents; timestamp of completion of basecalling
     if check_path_exists(os.path.join(locations.project_dir, "RTAComplete.txt")) == True:
         with open(os.path.join(locations.project_dir, "RTAComplete.txt"), 'r') as fin:
-            logger.info(fin.read().strip())
+            main.logger.info(fin.read().strip())
 
     # make a copy of DemultiplexingStat HTML with run name
     demultiplexing_stats_file = os.path.join(locations.unaligned_dir, "Demultiplex_Stats.htm")
-    new_demultiplexing_stats_file = os.path.join(locations.unaligned_dir, "{0}_{1}".format(main.project_ID, os.path.basename(demultiplexing_stats_file)))
+    new_demultiplexing_stats_file = os.path.join(locations.unaligned_dir, "{0}_{1}".format(locations.project_ID, os.path.basename(demultiplexing_stats_file)))
     log_copy(demultiplexing_stats_file, new_demultiplexing_stats_file)
     # add it to our locations
     locations.new_demultiplexing_stats_file = new_demultiplexing_stats_file
@@ -258,36 +254,48 @@ def get_recipient_list(demultiplexing_email_recipients_file):
         for line in f:
             return(line.strip()) # only the first line
 
-def main():
+def main(project_ID):
     '''
     Main control function for the program
     '''
-    project_ID = "170609_NB501073_0013_AHF7K3BGX2"
+    # get locations for dirs for the run
     locations = get_locations(project_ID = project_ID)
 
     # ~~~~~ LOGGING SETUP ~~~~~ #
-    # set some main attributes for the logpath functions
+    # set items for the log setup
+    scriptdir = os.path.dirname(os.path.realpath(__file__))
+    config_yaml = os.path.join(scriptdir,'logging.yml')
+    logger_name = 'mail_demultiplexing_results'
+
+    # set some main attributes for the get_logpath_values functions
     main.project_ID = project_ID
     main.auto_demultiplex_log_dir = locations.auto_demultiplex_log_dir
-    main.path = os.path.dirname(os.path.realpath(__file__))
+
+    # logger to use from the config file
     main.logger_name = 'mail_demultiplexing_results'
-    log_setup(locations)
-    logger = logging.getLogger(main.logger_name)
+
+    # the 'global' logger object to use throughout the script
+    main.logger = log_setup(config_yaml = config_yaml, logger_name = logger_name)
+
+    # log the paths to the logs in the logs
+    print_log_filenames(logger = main.logger)
+
 
     # ~~~~~ PROCESS RUN ~~~~~ #
     print_run_info(locations)
     validate_run(locations)
     run_housekeeping(locations)
 
+    # ~~~~~ EMAIL ~~~~~ #
     email_attachments = find_email_attachments(locations)
     recipient_list = get_recipient_list(locations.demultiplexing_email_recipients_file)
-    logger.debug(recipient_list)
-    logger.debug(email_attachments)
-
+    recipient_list = "kellys04@nyumc.org" # debugging
+    main.logger.debug('Email recipient list:\n{0}'.format(recipient_list))
+    main.logger.debug('Email attachments:\n{0}'.format(email_attachments))
     subject_line = "[Demultiplexing] NextSeq Run {0}".format(project_ID)
 
     # ~~~~~ SEND EMAIL ~~~~~ #
-    mutt.mutt_mail(recipient_list = recipient_list, reply_to = '', subject_line = subject_line, message_file = get_emaillog_filepath(logger), attachment_files = email_attachments, return_only_mode = False)
+    mutt.mutt_mail(recipient_list = recipient_list, reply_to = '', subject_line = subject_line, message_file = get_emaillog_filepath(main.logger), attachment_files = email_attachments, return_only_mode = False)
 
 
 def run():
@@ -295,7 +303,8 @@ def run():
     Run the monitoring program
     arg parsing goes here, if program was run as a script
     '''
-    main()
+    project_ID = "170609_NB501073_0013_AHF7K3BGX2"
+    main(project_ID = project_ID)
 
 # ~~~~ GLOBALS ~~~~~~ #
 timestamp = pf.timestamp()
