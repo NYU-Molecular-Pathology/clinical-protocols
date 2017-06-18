@@ -8,3 +8,6 @@ test-scripts
 generate-demultiplexing-reports/reports/*
 demo/output/*
 demo/python.o*
+demultiplexing/debug.log
+demultiplexing/info.log
+demultiplexing/testlog.py
