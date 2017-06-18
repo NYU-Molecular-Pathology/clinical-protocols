@@ -1,16 +1,13 @@
 version: 1
 formatters:
-  default:
-    format: "[%(asctime)s] [%(levelname)-8s] --- %(message)s (%(filename)s:%(lineno)s)"
-#    format: '%(asctime)s:%(name)s:%(module)s:%(funcName)s:%(lineno)d:%(levelname)s:%(message)s'
+  default: # default debug logger 
+    format: '[%(asctime)s] (%(name)s:%(funcName)s:%(lineno)d:%(levelname)s) %(message)s' # %(module)s:
     datefmt: "%Y-%m-%d %H:%M:%S"
-  info:
-    format: '[%(levelname)-8s] --- %(message)s'
-    # format: '%(levelname)s:%(message)s'
+  info: # basic info logging, for easier reading
+    format: '[%(levelname)-8s] %(message)s'
     datefmt: "%Y-%m-%d %H:%M:%S"
   console:
-    format: "[%(asctime)s] [%(levelname)-8s] --- %(message)s (%(filename)s:%(lineno)s)"
-    # format: '%(asctime)s:%(funcName)s:%(lineno)d:%(levelname)s:%(message)s'
+    format: '[%(asctime)s] (%(name)s:%(funcName)s:%(lineno)d:%(levelname)s) %(message)s' 
     datefmt: "%Y-%m-%d %H:%M:%S"
 
 handlers:

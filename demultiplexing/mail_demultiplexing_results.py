@@ -11,6 +11,7 @@ import logging
 import logging.config
 
 import mutt
+import parse_run_params_xml
 import python_functions as pf
 
 
@@ -21,7 +22,6 @@ class Container(object):
     basic container for information
     '''
     pass
-
 
 
 # ~~~~ CUSTOM FUNCTIONS ~~~~~~ #
@@ -38,6 +38,7 @@ def get_locations(project_ID):
     locations.demultiplexing_email_recipients_file = settings.demultiplexing_email_recipients_file
     locations.NextSeq_index_file = settings.NextSeq_index_file
     locations.project_dir = os.path.join(locations.nextseq_dir, project_ID)
+    locations.RunParametersXML = os.path.join(locations.project_dir, "RunParameters.xml")
     locations.basecalls_dir = os.path.join(locations.project_dir, "Data", "Intensities", "BaseCalls")
     locations.unaligned_dir = os.path.join(locations.basecalls_dir, "Unaligned")
     locations.demultiplexing_stats_dir = os.path.join(locations.unaligned_dir, "demultiplexing-stats")
@@ -105,7 +106,6 @@ def get_emaillog_filepath(logger):
                 log_file = h.baseFilename
     return(log_file)
 
-
 def print_log_filenames(logger):
     '''
     Print out the filenames of the log files we're using
@@ -113,7 +113,7 @@ def print_log_filenames(logger):
     log_files = find_logger_basefilenames(logger)
     for item in log_files:
         for key, value in item.items():
-            logger.info("{0} log file: {1}".format(key, value))
+            logger.info("{0} log: {1}".format(key, value))
 
 def log_setup(config_yaml, logger_name):
     '''
@@ -126,13 +126,25 @@ def log_setup(config_yaml, logger_name):
     loggingConf.close()
     return(logging.getLogger(logger_name))
 
+def print_run_params(RunParametersXML):
+    '''
+    Print run params information from the RunParametersXML
+    '''
+    if os.path.exists(RunParametersXML):
+        params_dict = parse_run_params_xml.make_params_dict(params_file = RunParametersXML)
+        for key, value in params_dict.items():
+            main.logger.info('{}: {}'.format(key, value))
 
 def print_run_info(locations):
     '''
     Print info about the current run
     '''
+    main.logger.info('Demultiplexing results for run: {0}'.format(locations.project_ID))
+
+    print_run_params(locations.RunParametersXML)
+
     main.logger.debug('nextseq_dir: {0}'.format(locations.nextseq_dir))
-    main.logger.debug('project_dir: {0}'.format(locations.project_dir))
+    main.logger.info('run project_dir: {0}'.format(locations.project_dir))
     main.logger.debug('BaseCalls dir: {0}'.format(locations.basecalls_dir))
     main.logger.debug('Unaligned dir: {0}'.format(locations.unaligned_dir))
 
@@ -192,10 +204,10 @@ def validate_run(locations):
     validations.append(check_path_exists(locations.demultiplexing_stats_dir))
     validations.append(check_path_exists(locations.demultiplexing_stats_html))
 
-
-
     if not all(validations):
-        main.logger.error("Errors were found while validating run")
+        main.logger.error("Errors were found while validating run; some items could not be found!")
+    if all(validations):
+        main.logger.info("The run passed all validations; all required items were found.")
 
 
 def find_email_attachments(locations):
@@ -203,10 +215,15 @@ def find_email_attachments(locations):
     Find all the files that we wish to email, if they are present
     '''
     desired_attachments = []
+    # SampleSheet.csv
     desired_attachments.append(find_file(filename = "SampleSheet.csv", dir = locations.basecalls_dir))
+    # RunParameters.xml
     desired_attachments.append(find_file(filename = "RunParameters.xml", dir = locations.project_dir))
+    # new_demultiplexing_stats_file
     desired_attachments.append(find_file(filename = os.path.basename(locations.new_demultiplexing_stats_file), dir = os.path.dirname(locations.new_demultiplexing_stats_file)))
+    # new_NextSeq_index_file
     desired_attachments.append(find_file(filename = os.path.basename(locations.new_NextSeq_index_file), dir = os.path.dirname(locations.new_NextSeq_index_file)))
+    # demultiplexing_stats_html
     desired_attachments.append(find_file(filename = os.path.basename(locations.demultiplexing_stats_html), dir = os.path.dirname(locations.demultiplexing_stats_html)))
 
     email_attachments = []
@@ -229,6 +246,7 @@ def run_housekeeping(locations):
     '''
     # try to print the RTAComplete.txt file contents; timestamp of completion of basecalling
     if check_path_exists(os.path.join(locations.project_dir, "RTAComplete.txt")) == True:
+        main.logger.info('File "RTAComplete.txt" found; basecalling completion information:')
         with open(os.path.join(locations.project_dir, "RTAComplete.txt"), 'r') as fin:
             main.logger.info(fin.read().strip())
 
@@ -248,11 +266,72 @@ def run_housekeeping(locations):
 
 def get_recipient_list(demultiplexing_email_recipients_file):
     '''
-    Get the email reciepient list
+    Get the email recipient list;
+    tom@gmail.com, jane@gmail.com
     '''
     with open(demultiplexing_email_recipients_file, 'r') as f:
         for line in f:
             return(line.strip()) # only the first line
+
+def get_server_address(email_server_address_file):
+    '''
+    Get the server address from the file;
+    server.edu
+    '''
+    with open(email_server_address_file, 'r') as f:
+        for line in f:
+            return(line.strip()) # only the first line
+
+def make_ssh_command():
+    '''
+    Set up the command needed to ssh back into the head node
+    '''
+    import getpass
+    import settings
+    username = getpass.getuser()
+    email_server_address_file = settings.email_server_address_file
+    server_address = get_server_address(email_server_address_file)
+    ssh_command = 'ssh {0}@{1}'.format(username, server_address)
+    return(ssh_command)
+
+
+def email(locations):
+    '''
+    Find all the items needed and run the email commands
+    '''
+    # ~~~~~ MUTT SETUP ~~~~~ #
+    # build the 'mutt' system command for sending the email
+    # attachments
+    email_attachments = find_email_attachments(locations)
+    main.logger.debug('Email attachments:\n{0}'.format(email_attachments))
+
+    # recipients
+    recipient_list = get_recipient_list(locations.demultiplexing_email_recipients_file)
+    recipient_list = "kellys04@nyumc.org" # debugging
+    main.logger.debug('Email recipient list:\n{0}'.format(recipient_list))
+
+    # subect
+    subject_line = "[Demultiplexing] Results: NextSeq Run {0}".format(locations.project_ID)
+
+    # mutt system comand
+    mutt_command = mutt.mutt_mail(recipient_list = recipient_list, reply_to = '', subject_line = subject_line, message_file = get_emaillog_filepath(main.logger), attachment_files = email_attachments, return_only_mode = True, quiet = True)
+
+
+    # ~~~~~ ssh SETUP ~~~~~ #
+    # mutt is only installed on the head node so we need to ssh back into the head node
+    # in order to run the mutt command
+    ssh_command = make_ssh_command()
+
+    # ~~~~~ SEND EMAIL ~~~~~ #
+    final_command = '''
+{0} <<E0F2
+{1}
+E0F2
+'''.format(ssh_command, mutt_command)
+    main.logger.debug('Email command is:\n{0}\n\n'.format(final_command))
+    pf.subprocess_cmd(command = final_command)
+
+
 
 def main(project_ID):
     '''
@@ -277,34 +356,36 @@ def main(project_ID):
     # the 'global' logger object to use throughout the script
     main.logger = log_setup(config_yaml = config_yaml, logger_name = logger_name)
 
+    # ~~~~~ PROCESS RUN ~~~~~ #
+    print_run_info(locations)
+
     # log the paths to the logs in the logs
     print_log_filenames(logger = main.logger)
 
-
-    # ~~~~~ PROCESS RUN ~~~~~ #
-    print_run_info(locations)
     validate_run(locations)
     run_housekeeping(locations)
 
     # ~~~~~ EMAIL ~~~~~ #
-    email_attachments = find_email_attachments(locations)
-    recipient_list = get_recipient_list(locations.demultiplexing_email_recipients_file)
-    recipient_list = "kellys04@nyumc.org" # debugging
-    main.logger.debug('Email recipient list:\n{0}'.format(recipient_list))
-    main.logger.debug('Email attachments:\n{0}'.format(email_attachments))
-    subject_line = "[Demultiplexing] NextSeq Run {0}".format(project_ID)
-
-    # ~~~~~ SEND EMAIL ~~~~~ #
-    mutt.mutt_mail(recipient_list = recipient_list, reply_to = '', subject_line = subject_line, message_file = get_emaillog_filepath(main.logger), attachment_files = email_attachments, return_only_mode = False)
+    email(locations)
 
 
 def run():
     '''
-    Run the monitoring program
+    Run the program from the command line
     arg parsing goes here, if program was run as a script
     '''
-    project_ID = "170609_NB501073_0013_AHF7K3BGX2"
-    main(project_ID = project_ID)
+    import argparse
+    # ~~~~ GET SCRIPT ARGS ~~~~~~ #
+    parser = argparse.ArgumentParser(description='Demultiplexing results email script')
+
+    parser.add_argument("project_IDs", type = str,  nargs='*', help="IDs of the NextSeq run(s) to be emailed") # nargs='+' #
+
+    args = parser.parse_args()
+
+    project_IDs = args.project_IDs
+
+    for project_ID in project_IDs:
+        main(project_ID = project_ID)
 
 # ~~~~ GLOBALS ~~~~~~ #
 timestamp = pf.timestamp()
