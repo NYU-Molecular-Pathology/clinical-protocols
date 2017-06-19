@@ -54,7 +54,7 @@ demultiplexing_post_processing () {
     local SAMPLE_SHEET="${BASECALLS_DIR}/SampleSheet.csv"
 
     # mail the results
-    # $mail_demultiplexing_results_script "$project_ID"
+    $mail_demultiplexing_results_script "$project_ID"
 
 }
 
