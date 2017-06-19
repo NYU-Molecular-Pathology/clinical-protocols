@@ -28,6 +28,10 @@ NextSeq_sample_index_file="/ifs/data/molecpathlab/quicksilver/run_index/NextSeq_
 sequencer_index_script="/ifs/data/molecpathlab/scripts/misc/sequencer_index.py"
 sequencer_xml_parse_script="/ifs/data/molecpathlab/scripts/misc/parse_run_params_xml.py"
 
+
+generate_demultiplexing_reports="/ifs/data/molecpathlab/scripts/generate-demultiplexing-reports/create_reports.py"
+
+
 # mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/demultiplexing/mail_demultiplexing_results.sh"
 
 mail_demultiplexing_results_script="/ifs/data/molecpathlab/scripts/demultiplexing/mail_demultiplexing_results.py"

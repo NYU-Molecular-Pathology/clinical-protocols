@@ -53,6 +53,9 @@ demultiplexing_post_processing () {
     local OUT_DIR="${BASECALLS_DIR}/Unaligned"
     local SAMPLE_SHEET="${BASECALLS_DIR}/SampleSheet.csv"
 
+    # run the report generate_demultiplexing_stats_report
+    $generate_demultiplexing_reports
+    
     # mail the results
     $mail_demultiplexing_results_script "$project_ID"
 
