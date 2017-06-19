@@ -307,7 +307,7 @@ def email(locations):
 
     # recipients
     recipient_list = get_recipient_list(locations.demultiplexing_email_recipients_file)
-    recipient_list = "kellys04@nyumc.org" # debugging
+    # recipient_list = "kellys04@nyumc.org" # debugging
     main.logger.debug('Email recipient list:\n{0}'.format(recipient_list))
 
     # subect
