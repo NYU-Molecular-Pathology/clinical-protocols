@@ -12,6 +12,7 @@
 - `demo`: misc scripts used to demonstrate programming techniques for use elsewhere
 - `demultiplexing`: scripts used for demultiplexing of NGS data
 - `generate-demultiplexing-reports`: script & location for generation of demultiplexing reports for all runs in the NextSeq directory
+- `misc`: scripts that don't fall into any other category
 - `reference-manuals`: important user manuals needed for reference
 - `samplesheets`: examle sample sheets used for analysis
 
