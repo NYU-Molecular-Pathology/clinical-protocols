@@ -54,8 +54,11 @@ demultiplexing_post_processing () {
     local SAMPLE_SHEET="${BASECALLS_DIR}/SampleSheet.csv"
 
     # run the report generate_demultiplexing_stats_report
+    (
+    cd "$(dirname "$generate_demultiplexing_reports")"
     $generate_demultiplexing_reports
-    
+    )
+
     # mail the results
     $mail_demultiplexing_results_script "$project_ID"
 

@@ -90,6 +90,15 @@ env > "$env_file"
 )
 
 # ~~~~~ More POST-PROCESSING ~~~~~ #
+# complete these steps back on the head node to get a clean environment and
+# make sure required binaries are installed
+email_server_address_file="$email_server_address_file" # from settings
+email_server_address="$(head -1 "$email_server_address_file" | tr -d '\n')"
+
+ssh ${USER}@${email_server_address} <<E0F2
 $demultiplexing_postprocessing_script "$PROJ"
+E0F2
+
+
 
 # end
