@@ -22,3 +22,6 @@
 [submodule "demultiplexing-stats"]
 	path = demultiplexing-stats
 	url = https://github.com/NYU-Molecular-Pathology/demultiplexing-stats.git
+[submodule "annotate-peaks"]
+	path = annotate-peaks
+	url = https://github.com/stevekm/annotate-peaks.git
