@@ -3,15 +3,13 @@
     "bin_dir": "/ifs/data/molecpathlab/bin", 
     "devices": {
         "IonTorrent": {
-            "location_type": "remote", 
-            "sequencing_types": {
+            "analysis_types": {
                 "IT50": {}
-            }
+            }, 
+            "location_type": "remote"
         }, 
         "NextSeq": {
-            "location": "/ifs/data/molecpathlab/quicksilver", 
-            "location_type": "local", 
-            "sequencing_types": {
+            "analysis_types": {
                 "Archer": {
                     "analysis_output_dir": "/ifs/data/molecpathlab/Archer", 
                     "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/Archer", 
@@ -22,7 +20,9 @@
                     "auto_demultiplex_dir": "/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/NGS580", 
                     "script": "/ifs/data/molecpathlab/scripts/demultiplexing/demultiplex-NGS580-WES.sh"
                 }
-            }
+            }, 
+            "location": "/ifs/data/molecpathlab/quicksilver", 
+            "location_type": "local"
         }
     }, 
     "email_recipients_file": "/ifs/data/molecpathlab/scripts/email_recipients.txt", 
