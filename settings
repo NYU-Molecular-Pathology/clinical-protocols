@@ -12,6 +12,7 @@ auto_demultiplex_log_dir="/ifs/data/molecpathlab/quicksilver/automatic_demultipl
 
 NGS580_auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/NGS580"
 Archer_auto_demultiplex_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/Archer"
+auto_demultiplex_processed_dir="/ifs/data/molecpathlab/quicksilver/to_be_demultiplexed/processed"
 
 email_recipients_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"
 demultiplexing_email_recipients_file="/ifs/data/molecpathlab/scripts/email_recipients.txt"

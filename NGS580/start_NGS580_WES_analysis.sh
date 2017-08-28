@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## USAGE: start_NGS580_WES_analysis.sh <project ID>
+## USAGE: start_NGS580_WES_analysis.sh <project ID> [/path/to/tumor-normal.pairs.csv]
 ## DESCRIPTION: This script will set up the Whole Exome Sequencing analysis for
 ## a clinical NGS 580 gene panel run project
 
@@ -69,8 +69,22 @@ find_top_level_fastq () {
     find "${input_dir}" -mindepth 1 -maxdepth 2 -type f -name "*.fastq.gz" ! -name "*Undetermined*"
 }
 
+move_pairs_samplesheet () {
+    local samples_pairs_sheet="$1"
+    local timestamp="$2"
+    local auto_demultiplex_processed_dir="$auto_demultiplex_processed_dir" # from settings
+    local samples_pairs_sheet_basename="$(basename "$samples_pairs_sheet")"
+
+    local processed_sheet_path="${auto_demultiplex_processed_dir}/${samples_pairs_sheet_basename}_$timestamp"
+
+    if [ "$samples_pairs_sheet" != 'none' ]; then
+        printf "moving file %s to %s\n\n" "$samples_pairs_sheet" "$processed_sheet_path"
+        /bin/mv -v "$samples_pairs_sheet" "$processed_sheet_path" && printf 'Move successful\n'
+    fi
+}
+
 # ~~~~~ CHECK SCRIPT ARGS ~~~~~ #
-if (( "$#" != "1" )); then
+if (( "$#" > "2" )) || (( "$#" < "1" )); then
     echo "ERROR: Wrong number of arguments supplied"
     grep '^##' $0
     exit
@@ -78,8 +92,11 @@ fi
 
 # ~~~~~ GET SCRIPT ARGS ~~~~~ #
 project_ID="$1"
+samples_pairs_sheet="${2:-none}"
 
+echo "$project_ID $samples_pairs_sheet"
 
+exit
 # ~~~~~ LOCATIONS & FILES & SETTINGS ~~~~~ #
 # sequencer_dir="/ifs/data/molecpathlab/quicksilver"
 sequencer_dir="$nextseq_dir"
@@ -151,4 +168,13 @@ cd "$analysis_project_results_dir"
 sns/gather-fastqs ../fastq_dir/
 sns/generate-settings hg19
 sns/run wes
+
+# copy over the samples-pairs sheet if it was passed
+if [ "$samples_pairs_sheet" != 'none' ]; then
+    printf "Copying over the samples tumor-normal pairs samplesheet\n"
+    /bin/cp -v "$samples_pairs_sheet" "${analysis_project_results_dir}/"
+    /bin/cp -v "$samples_pairs_sheet" "${analysis_project_results_dir}/samples.pairs.csv"
+    move_pairs_samplesheet "$samples_pairs_sheet"
+fi
+
 )
