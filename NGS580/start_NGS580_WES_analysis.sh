@@ -96,7 +96,6 @@ samples_pairs_sheet="${2:-none}"
 
 echo "$project_ID $samples_pairs_sheet"
 
-exit
 # ~~~~~ LOCATIONS & FILES & SETTINGS ~~~~~ #
 # sequencer_dir="/ifs/data/molecpathlab/quicksilver"
 sequencer_dir="$nextseq_dir"
