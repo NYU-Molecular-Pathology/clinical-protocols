@@ -11,3 +11,5 @@ demo/python.o*
 demultiplexing/debug.log
 demultiplexing/info.log
 demultiplexing/testlog.py
+snsxt-docs
+writeup
