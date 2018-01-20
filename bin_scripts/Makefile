@@ -22,3 +22,8 @@ msisensor/hg19_microsatellites.list: msisensor/msisensor
 	./msisensor scan -d "$(HG19_FA)" -o hg19_microsatellites.list
 
 msisensor: msisensor/hg19_microsatellites.list
+
+msisensor-test: msisensor
+	cd msisensor/test && \
+	module load samtools/0.1.19 && \
+    bash run.sh
