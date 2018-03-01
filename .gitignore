@@ -13,3 +13,5 @@ demultiplexing/info.log
 demultiplexing/testlog.py
 snsxt-docs
 writeup
+nextseq.sqlite
+*.pyc
