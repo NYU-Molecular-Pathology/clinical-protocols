@@ -6,7 +6,7 @@ Sets up and updates a SQLite database for tracking samples in runs
 import os
 import find
 import sqlite3
-import sqlite_tools as sqt
+from util import sqlite_tools as sqt
 
 # ~~~~~ FUNCTIONS ~~~~~ #
 def get_runs(seq_dir):
@@ -69,6 +69,12 @@ run_dirs = get_runs(seq_dir = seq_dir)
 
 # check the database for each run to see if the samplesheet needs to be added
 update_db_runs(conn = conn, run_dirs = run_dirs)
+
+# create csv dumps of database
+table_names = sqt.get_table_names(conn = conn)
+for name in table_names:
+        output_file = "{0}.csv".format(name)
+        sqt.dump_csv(conn = conn, table_name = name, output_file = output_file)
 
 # ~~~~~ CLEAN UP ~~~~~ #
 conn.commit()

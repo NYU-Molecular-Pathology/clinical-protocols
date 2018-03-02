@@ -28,3 +28,6 @@
 [submodule "snsxt"]
 	path = snsxt
 	url = https://github.com/NYU-Molecular-Pathology/snsxt.git
+[submodule "samples_database/util"]
+	path = samples_database/util
+	url = git@github.com:NYU-Molecular-Pathology/util.git
