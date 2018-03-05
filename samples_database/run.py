@@ -10,6 +10,7 @@ import sqlite3
 from util import samplesheet
 from util import sqlite_tools as sqt
 from util import tools
+
 # ~~~~~ FUNCTIONS ~~~~~ #
 def get_runs(seq_dir):
     """
@@ -131,9 +132,12 @@ if __name__ == '__main__':
     if force_val == "force":
         force_update = True
 
-    db_file = "nextseq.sqlite"
+    db_name = "nextseq"
+    db_dir = "/ifs/data/molecpathlab/quicksilver/run_index"
+    db_file = "{0}.sqlite".format(db_name)
+    db_path = os.path.join(db_dir, db_file)
     # connect to db
-    conn = sqlite3.connect(db_file)
+    conn = sqlite3.connect(db_path)
     setup_db(conn = conn)
 
     # directory with sequencer output
@@ -146,14 +150,15 @@ if __name__ == '__main__':
     update_db_runs(conn = conn, run_dirs = run_dirs)
 
     # dump the entire database
-    db_dump_file = os.path.join(os.path.dirname(db_file), '{0}.dump.txt'.format(os.path.basename(db_file)))
+    db_dump_file = os.path.join(os.path.dirname(db_path), '{0}.sqlite.dump.txt'.format(db_name))
     sqt.dump_sqlite(conn = conn, output_file = db_dump_file)
 
     # create csv dumps of database
     table_names = sqt.get_table_names(conn = conn)
     for name in table_names:
-            output_file = "{0}.csv".format(name)
+            output_file = os.path.join(os.path.dirname(db_path), "{0}.{1}.csv".format(db_name, name))
             sqt.dump_csv(conn = conn, table_name = name, output_file = output_file)
+
 
     # ~~~~~ CLEAN UP ~~~~~ #
     conn.commit()
