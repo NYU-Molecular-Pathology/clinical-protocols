@@ -18,3 +18,4 @@ nextseq.sqlite
 samples_database/settings.csv
 samples_database/samples.csv
 samples_database/nextseq.sqlite.dump.txt
+no_sync*
