@@ -15,3 +15,6 @@ snsxt-docs
 writeup
 nextseq.sqlite
 *.pyc
+samples_database/settings.csv
+samples_database/samples.csv
+samples_database/nextseq.sqlite.dump.txt
