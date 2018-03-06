@@ -30,6 +30,9 @@ def setup_db(conn):
     sqt.create_table(conn = conn, table_name = "params", col_name = "run", col_type = "TEXT", is_primary_key = True) # each run has one params entry
     sqt.create_table(conn = conn, table_name = "samples", col_name = "hash", col_type = "TEXT", is_primary_key = True) # multiple samples per run
 
+    sqt.create_table(conn = conn, table_name = "NGS580_samples", col_name = "hash", col_type = "TEXT", is_primary_key = True)
+    sqt.create_table(conn = conn, table_name = "NGS580_runs", col_name = "run", col_type = "TEXT", is_primary_key = True)
+
 def find_samplesheet(run_dir):
     """
     Finds the samplesheet in the run dir
@@ -164,9 +167,6 @@ def update_db_run(conn, path, run):
     # TODO: fix this it currentl breaks on SQL insert
     update_run_RunParametersxml(conn = conn, path = path, run = run, run_parameters_xml_matches = run_parameters_xml_matches)
 
-
-
-
 def update_db_runs(conn, run_dirs):
     """
     Check the database to make sure all run dirs are present with samplesheets
@@ -186,9 +186,81 @@ def update_db_runs(conn, run_dirs):
         else:
             print('Run dir already exists in database: {0}; skipping...'.format((run, path)))
 
+
+def update_db_NGS580(conn, path, run, results):
+    """
+    Updates a single analysis result's entries in the database
+    """
+    # create 'run' entry
+    run_row = {'run': run, 'path': path, 'results': results}
+    # add to the db
+    print("adding run to database: {0}".format(run_row))
+    sqt.sqlite_insert(conn = conn, table_name = "NGS580_runs", row = run_row, add_missing_cols = True)
+
+    samples_fastq_files = find.find(search_dir = path, inclusion_patterns = ["samples.fastq-raw.csv"],
+                                    search_type = 'file', level_limit = 1, match_mode = "all", num_limit = 1)
+    samples_pairs_files = find.find(search_dir = path, inclusion_patterns = ["samples.pairs.csv"],
+                                    search_type = 'file', level_limit = 1, match_mode = "all", num_limit = 1)
+
+    # parse the files
+    samples_fastq_file = samplesheet.SamplesFastqRawCSV(path = samples_fastq_files[0])
+    samples_pairs_file = samplesheet.SamplesPairsCSV(path = samples_pairs_files[0])
+
+    # merge the data into a single entry per sample
+    samples = []
+    for sample in samples_fastq_file.samples:
+        for pair in samples_pairs_file.pairs:
+            sample_dict = {}
+            if sample == pair['Tumor']:
+                sample_dict['Sample'] = sample
+                sample_dict.update(pair)
+                sample_dict['path'] = path
+                sample_dict['run'] = run
+                sample_dict['results'] = results
+                sample_dict['hash'] = sqt.md5_str(''.join([str(i) for i in sample_dict.values()]))
+                samples.append(sample_dict)
+    for sample in samples:
+        print("adding sample to database: {0}".format(sample))
+        sqt.sqlite_insert(conn = conn, table_name = "NGS580_samples", row = sample, add_missing_cols = True)
+
+
+
+
+
+def update_db_NGS580s(conn, analysis_dir, filter_file):
+    """
+    Check the database to make sure all NGS580 analysis metadata is present
+    """
+    # get allowed 'results dir' paths from text file
+    results_dirs = []
+    with open(filter_file) as f:
+        for line in f.readlines():
+            results_dirs.append(line.strip())
+
+    # find the analysis results directories and files
+    matches = [ m for m in find.find(search_dir = analysis_dir, inclusion_patterns = ["results_*"],
+                                    search_type = 'dir', level_limit = 1, match_mode = "all") if m in results_dirs ]
+
+    for path in matches:
+        run = os.path.basename( os.path.dirname(path) )
+        results = os.path.basename( path )
+
+        # check if the run is already in the db
+        if not sqt.row_exists(conn = conn, table_name = "NGS580_runs", col_name = "run", value = run):
+            # find the samplesheet
+            print('NGS580 analysis doesnt exist in database: {0}; searching for files...'.format((run, results, path)))
+            update_db_NGS580(conn = conn, path = path, run = run, results = results)
+        else:
+            print('NGS580 analysis already exists in database: {0}; skipping...'.format((run, results, path)))
+
+
+
+
+
 force_update = False
 # ~~~~~ RUN ~~~~~ #
 if __name__ == '__main__':
+    # ~~~~~ SETTINGS ~~~~~ #
     args = sys.argv[1:]
     try:
         force_val = args.pop(0)
@@ -210,12 +282,28 @@ if __name__ == '__main__':
     seq_dir = '/ifs/data/molecpathlab/quicksilver'
     print("seq_dir: {0}".format(seq_dir))
 
+    # directory with NGS580 analysis outputs
+    NGS580_dir = "/ifs/data/molecpathlab/NGS580_WES"
+    # file with list of analysis results subdirs to include
+    NGS580_results_dir_file = "results_dirs.txt"
+
+
+
+
+
+    # ~~~~~ UPDATE ~~~~~ #
     # get the list of available runs
     run_dirs = get_runs(seq_dir = seq_dir)
 
     # check the database for each run to see if the samplesheet needs to be added
     update_db_runs(conn = conn, run_dirs = run_dirs)
 
+    update_db_NGS580s(conn = conn, analysis_dir = NGS580_dir, filter_file = NGS580_results_dir_file)
+
+
+
+
+    # ~~~~~ CLEAN UP ~~~~~ #
     # dump the entire database
     db_dump_file = os.path.join(os.path.dirname(db_path), '{0}.sqlite.dump.txt'.format(db_name))
     sqt.dump_sqlite(conn = conn, output_file = db_dump_file)
@@ -225,8 +313,5 @@ if __name__ == '__main__':
     for name in table_names:
             output_file = os.path.join(os.path.dirname(db_path), "{0}.{1}.csv".format(db_name, name))
             sqt.dump_csv(conn = conn, table_name = name, output_file = output_file)
-
-
-    # ~~~~~ CLEAN UP ~~~~~ #
     conn.commit()
     conn.close()
