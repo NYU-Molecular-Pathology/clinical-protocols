@@ -27,6 +27,7 @@ def setup_db(conn):
     sqt.add_column(conn = conn, table_name = "runs", col_name = "path", col_type = "TEXT")
     sqt.add_column(conn = conn, table_name = "runs", col_name = "samplesheet", col_type = "TEXT")
     sqt.create_table(conn = conn, table_name = "settings", col_name = "run", col_type = "TEXT", is_primary_key = True) # each run has one settings entry
+    sqt.create_table(conn = conn, table_name = "params", col_name = "run", col_type = "TEXT", is_primary_key = True) # each run has one params entry
     sqt.create_table(conn = conn, table_name = "samples", col_name = "hash", col_type = "TEXT", is_primary_key = True) # multiple samples per run
 
 def find_samplesheet(run_dir):
@@ -34,6 +35,13 @@ def find_samplesheet(run_dir):
     Finds the samplesheet in the run dir
     """
     matches = find.find(search_dir = run_dir, inclusion_patterns = ['SampleSheet.csv'], search_type = "file")
+    return(matches)
+
+def find_RunParametersxml(run_dir):
+    """
+    """
+    matches = find.find(search_dir = run_dir, inclusion_patterns = ['RunParameters.xml'],
+                        search_type = "file", num_limit = 1, level_limit = 1, match_mode = "all")
     return(matches)
 
 def load_samplesheet_data(samplesheet_file):
@@ -55,9 +63,9 @@ def load_samplesheet_data(samplesheet_file):
     run_samples = data.data['Data']['Samples']
     return((run_settings, run_samples))
 
-def update_db_run(conn, path, run):
+def update_run_samplesheet(conn, path, run, samplesheet_matches):
     """
-    Update a single run in the db
+    Adds the SampleSheet.csv contents to the database
 
     Parameters
     ----------
@@ -67,11 +75,9 @@ def update_db_run(conn, path, run):
         path to the run directory
     run: str
         Name of the run
-
+    samplesheet_matches: list
+        a list of files matching sample sheet search criteria
     """
-    # find the samplesheet
-    samplesheet_matches = find_samplesheet(run_dir = path)
-    # validate search results
     if len(samplesheet_matches) > 1:
         print("ERROR: multiple files were found; {0}".format(samplesheet_matches))
         raise
@@ -80,7 +86,7 @@ def update_db_run(conn, path, run):
         return(None)
     else:
         # update the runs table
-        samplesheet_file = samplesheet_matches.pop()
+        samplesheet_file = samplesheet_matches.pop(0)
         print("Adding samplesheet: {0}".format(samplesheet_file))
         row = {'run': run, 'path': path, 'samplesheet': samplesheet_file}
         sqt.sqlite_insert(conn = conn, table_name = "runs", row = row)
@@ -101,6 +107,65 @@ def update_db_run(conn, path, run):
             for key in run_sample.keys():
                 sqt.add_column(conn = conn, table_name = "samples", col_name = key, col_type = "TEXT")
             sqt.sqlite_insert(conn = conn, table_name = "samples", row = run_sample)
+
+def update_run_RunParametersxml(conn, path, run, run_parameters_xml_matches):
+    """
+    Adds the RunParameters.xml contents to the database
+
+    Parameters
+    ----------
+    conn: sqlite3.Connection object
+        connection object to the database
+    path: str
+        path to the run directory
+    run: str
+        Name of the run
+    run_parameters_xml_matches: list
+        a list of files matching run_parameters_xml search criteria
+    """
+    # validate search results
+    if len(run_parameters_xml_matches) < 1:
+        print("WARNING: no RunParameters.xml files were found in dir; {0}".format(path))
+        return(None)
+    else:
+        # update the runs table
+        run_parameters_file = run_parameters_xml_matches.pop(0)
+        print("Adding RunParameters: {0}".format(run_parameters_file))
+        row = {'run': run, 'path': path, 'RunParameters': run_parameters_file}
+        # get the sample information from the sheet
+        run_params = samplesheet.RunParametersXML(path = run_parameters_file).data
+        # update sample information & add to db
+        run_params['run'] = run
+        run_params = sqt.sanitize_dict_keys(d = run_params)
+        sqt.sqlite_insert(conn = conn, table_name = "params", row = run_params, add_missing_cols = True)
+
+
+
+def update_db_run(conn, path, run):
+    """
+    Update a single run in the db
+
+    Parameters
+    ----------
+    conn: sqlite3.Connection object
+        connection object to the database
+    path: str
+        path to the run directory
+    run: str
+        Name of the run
+
+    """
+    # find the samplesheet
+    samplesheet_matches = find_samplesheet(run_dir = path)
+    update_run_samplesheet(conn = conn, path = path, run = run, samplesheet_matches = samplesheet_matches)
+
+    # find the RunParameters.xml
+    run_parameters_xml_matches = find_RunParametersxml(run_dir = path)
+    # TODO: fix this it currentl breaks on SQL insert
+    update_run_RunParametersxml(conn = conn, path = path, run = run, run_parameters_xml_matches = run_parameters_xml_matches)
+
+
+
 
 def update_db_runs(conn, run_dirs):
     """
@@ -136,12 +201,14 @@ if __name__ == '__main__':
     db_dir = "/ifs/data/molecpathlab/quicksilver/run_index"
     db_file = "{0}.sqlite".format(db_name)
     db_path = os.path.join(db_dir, db_file)
+    print("db_path: {0}".format(db_path))
     # connect to db
     conn = sqlite3.connect(db_path)
     setup_db(conn = conn)
 
     # directory with sequencer output
-    seq_dir = '/ifs/data/molecpathlab/quicksilver/'
+    seq_dir = '/ifs/data/molecpathlab/quicksilver'
+    print("seq_dir: {0}".format(seq_dir))
 
     # get the list of available runs
     run_dirs = get_runs(seq_dir = seq_dir)
