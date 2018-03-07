@@ -1,7 +1,9 @@
 SHELL:=/bin/bash
 
-vcflib/bin/vcf2tsv: 
-	git clone --recursive https://github.com/vcflib/vcflib.git && \
+vcflib: 
+	git clone --recursive https://github.com/ekg/vcflib.git
+
+vcflib/bin/vcf2tsv: vcflib
 	cd vcflib && \
 	make
 
