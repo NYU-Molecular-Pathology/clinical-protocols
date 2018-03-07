@@ -31,6 +31,7 @@ def setup_db(conn):
     sqt.create_table(conn = conn, table_name = "samples", col_name = "hash", col_type = "TEXT", is_primary_key = True) # multiple samples per run
 
     sqt.create_table(conn = conn, table_name = "NGS580_samples", col_name = "hash", col_type = "TEXT", is_primary_key = True)
+    sqt.create_table(conn = conn, table_name = "NGS580_samples_pairs", col_name = "hash", col_type = "TEXT", is_primary_key = True)
     sqt.create_table(conn = conn, table_name = "NGS580_runs", col_name = "run", col_type = "TEXT", is_primary_key = True)
 
 def find_samplesheet(run_dir):
@@ -206,25 +207,28 @@ def update_db_NGS580(conn, path, run, results):
     samples_fastq_file = samplesheet.SamplesFastqRawCSV(path = samples_fastq_files[0])
     samples_pairs_file = samplesheet.SamplesPairsCSV(path = samples_pairs_files[0])
 
-    # merge the data into a single entry per sample
+    # make dicts to add to db
     samples = []
+    samples_pairs = []
     for sample in samples_fastq_file.samples:
-        for pair in samples_pairs_file.pairs:
-            sample_dict = {}
-            if sample == pair['Tumor']:
-                sample_dict['Sample'] = sample
-                sample_dict.update(pair)
-                sample_dict['path'] = path
-                sample_dict['run'] = run
-                sample_dict['results'] = results
-                sample_dict['hash'] = sqt.md5_str(''.join([str(i) for i in sample_dict.values()]))
-                samples.append(sample_dict)
-    for sample in samples:
         print("adding sample to database: {0}".format(sample))
-        sqt.sqlite_insert(conn = conn, table_name = "NGS580_samples", row = sample, add_missing_cols = True)
+        sample_dict = {}
+        sample_dict['Sample'] = sample
+        sample_dict['path'] = path
+        sample_dict['run'] = run
+        sample_dict['results'] = results
+        sample_dict['hash'] = sqt.md5_str(''.join([str(i) for i in sample_dict.values()]))
+        sqt.sqlite_insert(conn = conn, table_name = "NGS580_samples", row = sample_dict, add_missing_cols = True)
 
-
-
+    for pair in samples_pairs_file.pairs:
+        print("adding sample pairt to database: {0}".format(pair))
+        pair_dict = {}
+        pair_dict.update(pair)
+        pair_dict['path'] = path
+        pair_dict['run'] = run
+        pair_dict['results'] = results
+        pair_dict['hash'] = sqt.md5_str(''.join([str(i) for i in pair_dict.values()]))
+        sqt.sqlite_insert(conn = conn, table_name = "NGS580_samples_pairs", row = pair_dict, add_missing_cols = True)
 
 
 def update_db_NGS580s(conn, analysis_dir, filter_file):
@@ -232,10 +236,10 @@ def update_db_NGS580s(conn, analysis_dir, filter_file):
     Check the database to make sure all NGS580 analysis metadata is present
     """
     # get allowed 'results dir' paths from text file
-    results_dirs = []
+    results_dirs = set()
     with open(filter_file) as f:
         for line in f.readlines():
-            results_dirs.append(line.strip())
+            results_dirs.add(line.strip())
 
     # find the analysis results directories and files
     matches = [ m for m in find.find(search_dir = analysis_dir, inclusion_patterns = ["results_*"],
@@ -306,12 +310,14 @@ if __name__ == '__main__':
     # ~~~~~ CLEAN UP ~~~~~ #
     # dump the entire database
     db_dump_file = os.path.join(os.path.dirname(db_path), '{0}.sqlite.dump.txt'.format(db_name))
+    print("dumping to file: {0}".format(db_dump_file))
     sqt.dump_sqlite(conn = conn, output_file = db_dump_file)
 
     # create csv dumps of database
     table_names = sqt.get_table_names(conn = conn)
     for name in table_names:
             output_file = os.path.join(os.path.dirname(db_path), "{0}.{1}.csv".format(db_name, name))
+            print("dumping to file: {0}".format(output_file))
             sqt.dump_csv(conn = conn, table_name = name, output_file = output_file)
     conn.commit()
     conn.close()
